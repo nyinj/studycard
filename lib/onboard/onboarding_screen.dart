@@ -22,10 +22,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   int _currentPage = 0;
-  List<Color> colors = [
-    AppColors.red,   
-    AppColors.blue,  
-    AppColors.skin,  
+
+  // Define colors for the titles and buttons
+  List<Color> titleColors = [
+    AppColors.red,
+    AppColors.blue,
+    AppColors.yellow,
   ];
 
   AnimatedContainer _buildDots({int? index}) {
@@ -59,7 +61,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     double height = SizeConfig.screenH!;
 
     return Scaffold(
-      backgroundColor: colors[_currentPage], // Use colors from your list
+      backgroundColor: Colors.white, // Set background to white for all pages
       body: SafeArea(
         child: Column(
           children: [
@@ -88,6 +90,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             fontFamily: "Mulish",
                             fontWeight: FontWeight.w600,
                             fontSize: (width <= 550) ? 30 : 35,
+                            color: titleColors[i], // Change title color
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -97,6 +100,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             fontFamily: "Mulish",
                             fontWeight: FontWeight.w300,
                             fontSize: (width <= 550) ? 17 : 25,
+                            color: Colors.black, // Keep description text black
                           ),
                           textAlign: TextAlign.center,
                         )
@@ -125,8 +129,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             onPressed: _completeOnboarding,
                             child: const Text("START"),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
+                              backgroundColor: titleColors[_currentPage], // Set button color based on title color
+                              foregroundColor: Colors.white, // Set text color to white
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                               ),
@@ -167,8 +171,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 },
                                 child: const Text("NEXT"),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.black,
+                                  backgroundColor: titleColors[_currentPage], // Set button color based on title color
+                                  foregroundColor: Colors.white, // Set text color to white
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(50),
                                   ),
