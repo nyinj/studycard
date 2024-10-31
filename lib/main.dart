@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:studycards/onboard/onboarding_screen.dart';
 import 'package:studycards/utils/colors.dart';
 import 'tabs/home_tab.dart';
 import 'tabs/flashcards_tab.dart';
 import 'tabs/create_tab.dart';
 import 'tabs/test_tab.dart';
 import 'tabs/profile_tab.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -16,8 +18,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Persistent Bottom Navigation',
-      home: HomeScreen(),
+      home: FutureBuilder<bool>(
+        future: _checkIfOnboardingCompleted(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else {
+            return snapshot.data == true ? HomeScreen() : OnboardingScreen();
+          }
+        },
+      ),
     );
+  }
+
+  Future<bool> _checkIfOnboardingCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('onboarding_completed') ?? false;
   }
 }
 
@@ -46,45 +62,44 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
-  return [
-    PersistentBottomNavBarItem(
-      icon: Icon(Icons.home),
-      title: ("Home"),
-      activeColorPrimary: AppColors.red, 
-      inactiveColorPrimary: Colors.grey, 
-      activeColorSecondary: Colors.white, 
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(Icons.book),
-      title: ("Flashcards"),
-      activeColorPrimary: AppColors.orange, 
-      inactiveColorPrimary: Colors.grey,
-      activeColorSecondary: Colors.white,
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(Icons.add),
-      title: ("Create"),
-      activeColorPrimary: AppColors.yellow, 
-      inactiveColorPrimary: Colors.grey,
-      activeColorSecondary: Colors.white,
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(Icons.quiz),
-      title: ("Test"),
-      activeColorPrimary: AppColors.blue, 
-      inactiveColorPrimary: Colors.grey,
-      activeColorSecondary: Colors.white,
-    ),
-    PersistentBottomNavBarItem(
-      icon: Icon(Icons.person),
-      title: ("Profile"),
-      activeColorPrimary: AppColors.blueish, 
-      inactiveColorPrimary: Colors.grey,
-      activeColorSecondary: Colors.white,
-    ),
-  ];
-}
-
+    return [
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.home),
+        title: ("Home"),
+        activeColorPrimary: AppColors.red, 
+        inactiveColorPrimary: Colors.grey, 
+        activeColorSecondary: Colors.white, 
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.book),
+        title: ("Flashcards"),
+        activeColorPrimary: AppColors.orange, 
+        inactiveColorPrimary: Colors.grey,
+        activeColorSecondary: Colors.white,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.add),
+        title: ("Create"),
+        activeColorPrimary: AppColors.yellow, 
+        inactiveColorPrimary: Colors.grey,
+        activeColorSecondary: Colors.white,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.quiz),
+        title: ("Test"),
+        activeColorPrimary: AppColors.blue, 
+        inactiveColorPrimary: Colors.grey,
+        activeColorSecondary: Colors.white,
+      ),
+      PersistentBottomNavBarItem(
+        icon: Icon(Icons.person),
+        title: ("Profile"),
+        activeColorPrimary: AppColors.blueish, 
+        inactiveColorPrimary: Colors.grey,
+        activeColorSecondary: Colors.white,
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,12 +108,10 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _controller,
       screens: _buildScreens(),
       items: _navBarsItems(),
-      navBarStyle: NavBarStyle.style7, // Set to Style 7
-      backgroundColor: Colors.white, 
+      navBarStyle: NavBarStyle.style7,
+      backgroundColor: Colors.white,
       handleAndroidBackButtonPress: true,
       resizeToAvoidBottomInset: true,
     );
   }
 }
-
-
