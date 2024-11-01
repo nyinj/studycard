@@ -14,17 +14,23 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Persistent Bottom Navigation',
+      theme: ThemeData(
+        scaffoldBackgroundColor: Colors.white, // Set the background color to white
+        // Add other theme properties as needed
+      ),
       home: FutureBuilder<bool>(
         future: _checkIfOnboardingCompleted(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else {
-            return snapshot.data == true ? HomeScreen() : OnboardingScreen();
+            return snapshot.data == true ? HomeScreen() : const OnboardingScreen();
           }
         },
       ),
@@ -38,6 +44,8 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -55,7 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return [
       HomeTab(),
       FlashcardsTab(),
-      CreateTab(),
+      CreateTab(
+        onDeckCreated: () {
+        // Optionally handle the callback here if needed
+      },
+      ),
       TestTab(),
       ProfileTab(),
     ];
@@ -64,39 +76,39 @@ class _HomeScreenState extends State<HomeScreen> {
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.home),
+        icon: const Icon(Icons.home),
         title: ("Home"),
         activeColorPrimary: AppColors.red, 
         inactiveColorPrimary: Colors.grey, 
-        activeColorSecondary: Colors.white, 
+        activeColorSecondary: AppColors.red,
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.book),
+        icon: const Icon(Icons.book),
         title: ("Flashcards"),
         activeColorPrimary: AppColors.orange, 
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: Colors.white,
+        activeColorSecondary: AppColors.orange, 
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.add),
+        icon: const Icon(Icons.add),
         title: ("Create"),
         activeColorPrimary: AppColors.yellow, 
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: Colors.white,
+        activeColorSecondary: const Color.fromARGB(255, 225, 205, 106), 
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.quiz),
+        icon: const Icon(Icons.quiz),
         title: ("Test"),
         activeColorPrimary: AppColors.blue, 
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: Colors.white,
+        activeColorSecondary: AppColors.blue,
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(Icons.person),
+        icon: const Icon(Icons.person),
         title: ("Profile"),
         activeColorPrimary: AppColors.blueish, 
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: Colors.white,
+        activeColorSecondary: AppColors.blueish, 
       ),
     ];
   }
@@ -108,8 +120,8 @@ class _HomeScreenState extends State<HomeScreen> {
       controller: _controller,
       screens: _buildScreens(),
       items: _navBarsItems(),
-      navBarStyle: NavBarStyle.style7,
-      backgroundColor: Colors.white,
+      navBarStyle: NavBarStyle.style12,
+      backgroundColor: Colors.white, // Ensure tab bar background is white
       handleAndroidBackButtonPress: true,
       resizeToAvoidBottomInset: true,
     );

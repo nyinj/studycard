@@ -3,10 +3,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/main.dart';
 import 'package:studycards/onboard/size_config.dart';
 import 'package:studycards/onboard/onboarding_contents.dart';
+import 'package:studycards/onboard/username_screen.dart';
 import 'package:studycards/utils/colors.dart'; 
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({Key? key}) : super(key: key);
+  const OnboardingScreen({super.key});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -128,7 +129,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           padding: const EdgeInsets.all(30),
                           child: ElevatedButton(
                             onPressed: _completeOnboarding,
-                            child: const Text("START"),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: titleColors[_currentPage], // Set button color based on title color
                               foregroundColor: Colors.white, // Set text color to white
@@ -140,6 +140,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   : EdgeInsets.symmetric(horizontal: width * 0.2, vertical: 25),
                               textStyle: TextStyle(fontSize: (width <= 550) ? 13 : 17),
                             ),
+                            child: const Text("START"),
                           ),
                         )
                       : Padding(
@@ -151,16 +152,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                 onPressed: () {
                                   _controller.jumpToPage(2);
                                 },
-                                child: const Text(
-                                  "SKIP",
-                                  style: TextStyle(color: Colors.black),
-                                ),
                                 style: TextButton.styleFrom(
                                   elevation: 0,
                                   textStyle: TextStyle(
                                     fontWeight: FontWeight.w600,
                                     fontSize: (width <= 550) ? 13 : 17,
                                   ),
+                                ),
+                                child: const Text(
+                                  "SKIP",
+                                  style: TextStyle(color: Colors.black),
                                 ),
                               ),
                               ElevatedButton(
@@ -170,7 +171,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     curve: Curves.easeIn,
                                   );
                                 },
-                                child: const Text("NEXT"),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: titleColors[_currentPage], // Set button color based on title color
                                   foregroundColor: Colors.white, // Set text color to white
@@ -183,6 +183,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                       : const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
                                   textStyle: TextStyle(fontSize: (width <= 550) ? 13 : 17),
                                 ),
+                                child: const Text("NEXT"),
                               ),
                             ],
                           ),
