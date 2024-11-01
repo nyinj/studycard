@@ -63,6 +63,13 @@ flutter:
     - assets/study.png
     - assets/export.png
     - assets/export.svg
+    - assets/profiles/pfp1.png
+    - assets/profiles/pfp2.png
+    - assets/profiles/pfp3.png
+    - assets/profiles/pfp4.png
+    - assets/profiles/pfp5.png
+    - assets/profiles/pfp6.png
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:

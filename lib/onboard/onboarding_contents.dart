@@ -24,7 +24,7 @@ List<OnboardingContents> contents = [
   ),
   OnboardingContents(
     title: "Export your flashcards",
-    image: "assets/export.svg",
+    image: "assets/export.png",
     desc:
         "Export or import your flashcards from anywhere.",
   ),

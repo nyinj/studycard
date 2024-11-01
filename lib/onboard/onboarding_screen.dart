@@ -45,14 +45,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _completeOnboarding() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('onboarding_completed', true);
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('onboarding_completed', true);
 
-    // Navigate to the home screen
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => HomeScreen()), 
-    );
-  }
+  // Navigate to the UsernameScreen
+  Navigator.of(context).pushReplacement(
+    MaterialPageRoute(builder: (context) => UsernameScreen()),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
