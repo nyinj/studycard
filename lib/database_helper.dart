@@ -22,14 +22,16 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'flashcards.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Increment the version
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE decks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT,
             description TEXT,
-            color TEXT
+            color TEXT,
+            createdAt TEXT,  -- New column for creation date
+            number_of_cards INTEGER DEFAULT 0 -- New column for card count
           )
         ''');
         
@@ -44,15 +46,22 @@ class DatabaseHelper {
           )
         ''');
       },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE decks ADD COLUMN createdAt TEXT');
+          await db.execute('ALTER TABLE decks ADD COLUMN number_of_cards INTEGER DEFAULT 0');
+        }
+      },
     );
   }
 
-  Future<int> insertDeck(String title, String description, String color) async {
+  Future<int> insertDeck(String title, String description, String color, String createdAt) async {
     final db = await database;
     return await db.insert('decks', {
       'title': title,
       'description': description,
       'color': color,
+      'createdAt': createdAt,
     });
   }
 
@@ -79,6 +88,26 @@ class DatabaseHelper {
     });
   }
 
+  // Method to update the number of flashcards in a deck
+  Future<void> updateDeckCardCount(int deckId, int cardCount) async {
+    final db = await database;
+    await db.update(
+      'decks',
+      {'number_of_cards': cardCount},
+      where: 'id = ?',
+      whereArgs: [deckId],
+    );
+  }
+
+  Future<int> deleteDeck(int id) async {
+    final db = await database;
+    return await db.delete(
+      'decks',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   // Method to delete a flashcard by id
   Future<int> deleteFlashcard(int id) async {
     final db = await database;
@@ -86,6 +115,15 @@ class DatabaseHelper {
       'flashcards',
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  // Method to decrement the card count when a flashcard is deleted
+  Future<void> decrementCardCount(int deckId) async {
+    final db = await database;
+    await db.rawUpdate(
+      'UPDATE decks SET number_of_cards = number_of_cards - 1 WHERE id = ?',
+      [deckId],
     );
   }
 }

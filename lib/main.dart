@@ -21,8 +21,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Persistent Bottom Navigation',
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white, // Set the background color to white
-        // Add other theme properties as needed
+        scaffoldBackgroundColor: Colors.white,
       ),
       home: FutureBuilder<bool>(
         future: _checkIfOnboardingCompleted(),
@@ -62,11 +61,13 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Widget> _buildScreens() {
     return [
       HomeTab(),
-      FlashcardsTab(),
+      FlashcardsTab(controller: _controller),
       CreateTab(
         onDeckCreated: () {
-        // Optionally handle the callback here if needed
-      },
+          // Optionally handle the callback here if needed
+          // For example, refresh data or show a message
+        },
+        controller: _controller,
       ),
       TestTab(),
       ProfileTab(),
@@ -78,52 +79,49 @@ class _HomeScreenState extends State<HomeScreen> {
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.home),
         title: ("Home"),
-        activeColorPrimary: AppColors.red, 
-        inactiveColorPrimary: Colors.grey, 
-        activeColorSecondary: AppColors.red,
+        activeColorPrimary: AppColors.red,
+        inactiveColorPrimary: Colors.grey,
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.book),
         title: ("Flashcards"),
-        activeColorPrimary: AppColors.orange, 
+        activeColorPrimary: AppColors.orange,
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: AppColors.orange, 
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.add),
         title: ("Create"),
-        activeColorPrimary: AppColors.yellow, 
+        activeColorPrimary: AppColors.yellow,
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: const Color.fromARGB(255, 225, 205, 106), 
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.quiz),
         title: ("Test"),
-        activeColorPrimary: AppColors.blue, 
+        activeColorPrimary: AppColors.blue,
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: AppColors.blue,
       ),
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.person),
         title: ("Profile"),
-        activeColorPrimary: AppColors.blueish, 
+        activeColorPrimary: AppColors.blueish,
         inactiveColorPrimary: Colors.grey,
-        activeColorSecondary: AppColors.blueish, 
       ),
     ];
   }
 
   @override
   Widget build(BuildContext context) {
-    return PersistentTabView(
-      context,
-      controller: _controller,
-      screens: _buildScreens(),
-      items: _navBarsItems(),
-      navBarStyle: NavBarStyle.style12,
-      backgroundColor: Colors.white, // Ensure tab bar background is white
-      handleAndroidBackButtonPress: true,
-      resizeToAvoidBottomInset: true,
+    return Scaffold(
+      body: PersistentTabView(
+        context,
+        controller: _controller,
+        screens: _buildScreens(),
+        items: _navBarsItems(),
+        navBarStyle: NavBarStyle.style12,
+        backgroundColor: Colors.white,
+        handleAndroidBackButtonPress: true,
+        resizeToAvoidBottomInset: true,
+      ),
     );
   }
 }

@@ -3,9 +3,13 @@ import 'package:studycards/tabs/create_tab.dart'; // Import the CreateTab
 import 'package:studycards/tabs/custom_title.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_model.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:intl/intl.dart'; // Import for date formatting
 
 class FlashcardsTab extends StatefulWidget {
-  const FlashcardsTab({super.key});
+  final PersistentTabController controller;
+
+  const FlashcardsTab({super.key, required this.controller});
 
   @override
   _FlashcardsTabState createState() => _FlashcardsTabState();
@@ -32,17 +36,32 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
   }
 
   Future<void> _loadFlashcards(int deckId) async {
-    final flashcards = await _databaseHelper.getFlashcardsByDeckId(deckId);
-    setState(() {
-      _flashcards = flashcards;
-      _selectedDeckId = deckId;
-    });
-  }
+  final flashcards = await _databaseHelper.getFlashcardsByDeckId(deckId);
+  // Sort flashcards by createdAt in descending order (latest first)
+  flashcards.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+  setState(() {
+    _flashcards = flashcards;
+    _selectedDeckId = deckId;
+  });
+}
+
 
   Future<void> _refresh() async {
-    await _loadDecks(); // Refresh decks
+    await _loadDecks();
     if (_selectedDeckId != null) {
-      await _loadFlashcards(_selectedDeckId!); // Refresh flashcards for the selected deck
+      await _loadFlashcards(_selectedDeckId!);
+    }
+  }
+
+  Future<void> _deleteDeck(int id) async {
+    await _databaseHelper.deleteDeck(id); // Call the method from DatabaseHelper
+    _loadDecks(); // Refresh deck list after deletion
+  }
+
+  Future<void> _deleteFlashcard(int id) async {
+    await _databaseHelper.deleteFlashcard(id);
+    if (_selectedDeckId != null) {
+      _loadFlashcards(_selectedDeckId!);
     }
   }
 
@@ -63,17 +82,7 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
             // Button to create a new deck
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreateTab(
-                      onDeckCreated: () {
-                        // Refresh the decks when returning from CreateTab
-                        _loadDecks();
-                      },
-                    ),
-                  ),
-                );
+                widget.controller.jumpToTab(2);
               },
               child: Text('Create Deck'),
             ),
@@ -84,10 +93,21 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
                 itemCount: _decks.length,
                 itemBuilder: (context, index) {
                   final deck = _decks[index];
+                  // Parse the createdAt date
+                  DateTime createdDate = DateTime.parse(deck['createdAt']);
+                  String formattedDate = DateFormat('yyyy-MM-dd').format(createdDate);
+
                   return Card(
                     child: ListTile(
                       title: Text(deck['title']),
-                      subtitle: Text(deck['description']),
+                      subtitle: Text(
+                          'Cards: ${deck['number_of_cards']}, Created on: $formattedDate'), // Use formatted date
+                      trailing: IconButton(
+                        icon: Icon(Icons.delete),
+                        onPressed: () {
+                          _deleteDeck(deck['id']);
+                        },
+                      ),
                       onTap: () => _loadFlashcards(deck['id']),
                     ),
                   );
@@ -95,45 +115,32 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
               ),
             ),
 
-            // Always show the header
-            Divider(),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text('Flashcards in this deck:', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-
             // Flashcard List
-            Expanded(
-              child: _flashcards.isNotEmpty
-                  ? ListView.builder(
-                      itemCount: _flashcards.length,
-                      itemBuilder: (context, index) {
-                        final flashcard = _flashcards[index];
-                        return Card(
-                          color: Color(int.parse(flashcard.color)),
-                          child: ListTile(
-                            title: Text(flashcard.question),
-                            subtitle: Text(flashcard.answer),
-                            trailing: IconButton(
-                              icon: Icon(Icons.delete),
-                              onPressed: () => _deleteFlashcard(flashcard.id!),
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  : Center(child: Text("No flashcards created", style: TextStyle(fontSize: 18))),
-            ),
+            if (_flashcards.isNotEmpty) ...[
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _flashcards.length,
+                  itemBuilder: (context, index) {
+                    final flashcard = _flashcards[index];
+return Card(
+  color: Color(int.parse(flashcard.color)),
+  child: ListTile(
+    title: Text(flashcard.question),
+    subtitle: Text(flashcard.answer),
+    trailing: IconButton(
+      icon: Icon(Icons.delete),
+      onPressed: () => _deleteFlashcard(flashcard.id!),
+    ),
+  ),
+);
+
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),
     );
-  }
-
-  Future<void> _deleteFlashcard(int id) async {
-    await _databaseHelper.deleteFlashcard(id);
-    if (_selectedDeckId != null) {
-      _loadFlashcards(_selectedDeckId!);
-    }
   }
 }
