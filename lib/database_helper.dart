@@ -22,8 +22,9 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'flashcards.db');
     return await openDatabase(
       path,
-      version: 2, // Increment the version
+      version: 3, // Increment the version
       onCreate: (db, version) async {
+        // Creating decks table
         await db.execute('''
           CREATE TABLE decks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -34,7 +35,8 @@ class DatabaseHelper {
             number_of_cards INTEGER DEFAULT 0 -- New column for card count
           )
         ''');
-        
+
+        // Creating flashcards table
         await db.execute('''
           CREATE TABLE flashcards (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -42,19 +44,22 @@ class DatabaseHelper {
             answer TEXT,
             color TEXT,
             deckId INTEGER,
+            createdAt TEXT,
             FOREIGN KEY (deckId) REFERENCES decks (id)
           )
         ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
-          await db.execute('ALTER TABLE decks ADD COLUMN createdAt TEXT');
-          await db.execute('ALTER TABLE decks ADD COLUMN number_of_cards INTEGER DEFAULT 0');
+          // Add 'createdAt' column to 'flashcards' table
+          await db.execute('ALTER TABLE flashcards ADD COLUMN createdAt TEXT');
         }
+        // Add further migrations here for other versions if needed
       },
     );
   }
 
+  // Insert a new deck
   Future<int> insertDeck(String title, String description, String color, String createdAt) async {
     final db = await database;
     return await db.insert('decks', {
@@ -65,16 +70,19 @@ class DatabaseHelper {
     });
   }
 
+  // Insert a new flashcard
   Future<int> insertFlashcard(Flashcard flashcard) async {
     final db = await database;
     return await db.insert('flashcards', flashcard.toMap());
   }
 
+  // Get all decks
   Future<List<Map<String, dynamic>>> getDecks() async {
     final db = await database;
     return await db.query('decks');
   }
 
+  // Get all flashcards by deckId
   Future<List<Flashcard>> getFlashcardsByDeckId(int deckId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -88,7 +96,7 @@ class DatabaseHelper {
     });
   }
 
-  // Method to update the number of flashcards in a deck
+  // Update the number of flashcards in a deck
   Future<void> updateDeckCardCount(int deckId, int cardCount) async {
     final db = await database;
     await db.update(
@@ -99,6 +107,7 @@ class DatabaseHelper {
     );
   }
 
+  // Delete a deck by id
   Future<int> deleteDeck(int id) async {
     final db = await database;
     return await db.delete(
@@ -108,7 +117,7 @@ class DatabaseHelper {
     );
   }
 
-  // Method to delete a flashcard by id
+  // Delete a flashcard by id
   Future<int> deleteFlashcard(int id) async {
     final db = await database;
     return await db.delete(
@@ -118,7 +127,7 @@ class DatabaseHelper {
     );
   }
 
-  // Method to decrement the card count when a flashcard is deleted
+  // Decrement the card count when a flashcard is deleted
   Future<void> decrementCardCount(int deckId) async {
     final db = await database;
     await db.rawUpdate(
