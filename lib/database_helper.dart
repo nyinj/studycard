@@ -18,6 +18,22 @@ class DatabaseHelper {
     return _database!;
   }
 
+  // Add this method to get a deck by its ID
+  Future<Map<String, dynamic>> getDeckById(int deckId) async {
+    final db = await _database;
+    final result = await db!.query(
+      'decks', // assuming 'decks' is the name of the table
+      where: 'id = ?',
+      whereArgs: [deckId],
+    );
+    
+    if (result.isNotEmpty) {
+      return result.first; // Return the first result (deck) found
+    } else {
+      throw Exception('Deck not found');
+    }
+  }
+
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'flashcards.db');
     return await openDatabase(
@@ -36,7 +52,7 @@ class DatabaseHelper {
           )
         ''');
 
-        // Creating flashcards table
+        // Creating flashcards table with a new "note" field
         await db.execute('''
           CREATE TABLE flashcards (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -45,16 +61,16 @@ class DatabaseHelper {
             color TEXT,
             deckId INTEGER,
             createdAt TEXT,
+            note TEXT,  -- New column for notes
             FOREIGN KEY (deckId) REFERENCES decks (id)
           )
         ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 2) {
-          // Add 'createdAt' column to 'flashcards' table
-          await db.execute('ALTER TABLE flashcards ADD COLUMN createdAt TEXT');
+        if (oldVersion < 3) {
+          // Add 'note' column to 'flashcards' table
+          await db.execute('ALTER TABLE flashcards ADD COLUMN note TEXT');
         }
-        // Add further migrations here for other versions if needed
       },
     );
   }
@@ -134,5 +150,33 @@ class DatabaseHelper {
       'UPDATE decks SET number_of_cards = number_of_cards - 1 WHERE id = ?',
       [deckId],
     );
+  }
+
+  // Update the note for a specific flashcard
+  Future<void> updateFlashcardNote(int flashcardId, String note) async {
+    final db = await database;
+    await db.update(
+      'flashcards',
+      {'note': note},
+      where: 'id = ?',
+      whereArgs: [flashcardId],
+    );
+  }
+
+  // Get the note for a specific flashcard
+  Future<String?> getFlashcardNote(int flashcardId) async {
+    final db = await database;
+    final result = await db.query(
+      'flashcards',
+      columns: ['note'],
+      where: 'id = ?',
+      whereArgs: [flashcardId],
+    );
+    
+    if (result.isNotEmpty) {
+      return result.first['note'] as String?;
+    } else {
+      return null;
+    }
   }
 }

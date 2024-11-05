@@ -3,8 +3,9 @@ class Flashcard {
   final int deckId;
   final String question;
   final String answer;
-  final DateTime createdAt;  // Keep it as a DateTime
+  final DateTime createdAt;
   final String color;
+  String note;  // This will hold the note for each flashcard
 
   Flashcard({
     this.id,
@@ -13,6 +14,7 @@ class Flashcard {
     required this.answer,
     required this.createdAt,
     required this.color,
+    this.note = '', // Default empty note
   });
 
   // Convert a Map into a Flashcard
@@ -24,8 +26,9 @@ class Flashcard {
       answer: map['answer'],
       createdAt: map['createdAt'] != null 
           ? DateTime.parse(map['createdAt']) 
-          : DateTime.now(),  // Handle null safely
+          : DateTime.now(),
       color: map['color'],
+      note: map['note'] ?? '',  // Default empty note if no note is available
     );
   }
 
@@ -36,7 +39,8 @@ class Flashcard {
       'question': question,
       'answer': answer,
       'color': color,
-      'createdAt': createdAt.toIso8601String(),  // Ensure DateTime is formatted correctly
+      'createdAt': createdAt.toIso8601String(),
+      'note': note,  // Include the note when converting to Map
     };
   }
 }

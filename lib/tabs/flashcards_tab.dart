@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:studycards/flashcard_widget.dart';
 import 'package:studycards/tabs/create_tab.dart'; // Import the CreateTab
 import 'package:studycards/tabs/custom_title.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_model.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:intl/intl.dart'; // Import for date formatting
+import 'package:studycards/tabs/your_flashcards.dart'; // Import the YourFlashcardsScreen
 
 class FlashcardsTab extends StatefulWidget {
   final PersistentTabController controller;
@@ -18,7 +20,6 @@ class FlashcardsTab extends StatefulWidget {
 class _FlashcardsTabState extends State<FlashcardsTab> {
   late final DatabaseHelper _databaseHelper;
   List<Map<String, dynamic>> _decks = [];
-  List<Flashcard> _flashcards = [];
   int? _selectedDeckId;
 
   @override
@@ -28,6 +29,7 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
     _loadDecks();
   }
 
+  // Load decks
   Future<void> _loadDecks() async {
     final decks = await _databaseHelper.getDecks();
     setState(() {
@@ -35,34 +37,15 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
     });
   }
 
-  Future<void> _loadFlashcards(int deckId) async {
-  final flashcards = await _databaseHelper.getFlashcardsByDeckId(deckId);
-  // Sort flashcards by createdAt in descending order (latest first)
-  flashcards.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-  setState(() {
-    _flashcards = flashcards;
-    _selectedDeckId = deckId;
-  });
-}
-
-
+  // Refresh deck list
   Future<void> _refresh() async {
     await _loadDecks();
-    if (_selectedDeckId != null) {
-      await _loadFlashcards(_selectedDeckId!);
-    }
   }
 
+  // Delete deck
   Future<void> _deleteDeck(int id) async {
     await _databaseHelper.deleteDeck(id); // Call the method from DatabaseHelper
     _loadDecks(); // Refresh deck list after deletion
-  }
-
-  Future<void> _deleteFlashcard(int id) async {
-    await _databaseHelper.deleteFlashcard(id);
-    if (_selectedDeckId != null) {
-      _loadFlashcards(_selectedDeckId!);
-    }
   }
 
   @override
@@ -108,36 +91,20 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
                           _deleteDeck(deck['id']);
                         },
                       ),
-                      onTap: () => _loadFlashcards(deck['id']),
+                      onTap: () {
+                        // Navigate to the flashcards screen for the selected deck
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => YourFlashcardsScreen(deckId: deck['id']),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
               ),
             ),
-
-            // Flashcard List
-            if (_flashcards.isNotEmpty) ...[
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _flashcards.length,
-                  itemBuilder: (context, index) {
-                    final flashcard = _flashcards[index];
-return Card(
-  color: Color(int.parse(flashcard.color)),
-  child: ListTile(
-    title: Text(flashcard.question),
-    subtitle: Text(flashcard.answer),
-    trailing: IconButton(
-      icon: Icon(Icons.delete),
-      onPressed: () => _deleteFlashcard(flashcard.id!),
-    ),
-  ),
-);
-
-                  },
-                ),
-              ),
-            ],
           ],
         ),
       ),
