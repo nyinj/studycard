@@ -27,10 +27,12 @@ class FlashcardWidget extends StatelessWidget {
         direction: FlipDirection.HORIZONTAL, // Set flip direction
         flipOnTouch: true, // The card flips when tapped
         front: SizedBox(
-          width: cardSize,  // Set the width of the square
+          width: cardSize, // Set the width of the square
           height: cardSize, // Set the height of the square
           child: Card(
-            color: isQuestionSide ? Color(int.parse(color)) : AppColors.skin, // Conditional color based on side
+            color: isQuestionSide
+                ? Color(int.parse(color))
+                : AppColors.skin, // Conditional color based on side
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
             ),
@@ -50,7 +52,7 @@ class FlashcardWidget extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 10),
-                
+
                 // The actual question
                 Text(
                   question,
@@ -66,10 +68,12 @@ class FlashcardWidget extends StatelessWidget {
           ),
         ),
         back: SizedBox(
-          width: cardSize,  // Set the width of the square
+          width: cardSize, // Set the width of the square
           height: cardSize, // Set the height of the square
           child: Card(
-            color: isQuestionSide ? AppColors.skin : Color(int.parse(color)), // Conditional color based on side
+            color: isQuestionSide
+                ? AppColors.skin
+                : Color(int.parse(color)), // Conditional color based on side
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.0),
             ),
@@ -95,7 +99,9 @@ class FlashcardWidget extends StatelessWidget {
                   answer,
                   style: TextStyle(
                     fontSize: 24.0, // Adjust font size as needed
-                    color: isQuestionSide ? Colors.black : Colors.black, // Set black for answer side
+                    color: isQuestionSide
+                        ? Colors.black
+                        : Colors.black, // Set black for answer side
                   ),
                   textAlign: TextAlign.center,
                 ),

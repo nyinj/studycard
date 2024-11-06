@@ -35,7 +35,9 @@ class _CreateTabState extends State<CreateTab> {
   Color _selectedColor = AppColors.red; // Default color
   String _title = '';
   String _description = '';
-  List<Map<String, String>> _cards = [{'question': '', 'answer': ''}]; // Initial empty card
+  List<Map<String, String>> _cards = [
+    {'question': '', 'answer': ''}
+  ]; // Initial empty card
 
   // TextEditingControllers for the input fields
   final TextEditingController _titleController = TextEditingController();
@@ -113,7 +115,9 @@ class _CreateTabState extends State<CreateTab> {
                     color: color,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: _selectedColor == color ? Colors.black : Colors.transparent,
+                      color: _selectedColor == color
+                          ? Colors.black
+                          : Colors.transparent,
                       width: 2,
                     ),
                   ),
@@ -138,7 +142,7 @@ class _CreateTabState extends State<CreateTab> {
             onPressed: _addCard,
             style: ElevatedButton.styleFrom(
               backgroundColor: _selectedColor, // Button background color
-              foregroundColor: Colors.white,   // Button text color
+              foregroundColor: Colors.white, // Button text color
             ),
             child: Text('Add More Cards'),
           ),
@@ -148,7 +152,7 @@ class _CreateTabState extends State<CreateTab> {
             onPressed: _saveFlashcards,
             style: ElevatedButton.styleFrom(
               backgroundColor: _selectedColor, // Button background color
-              foregroundColor: Colors.white,   // Button text color
+              foregroundColor: Colors.white, // Button text color
             ),
             child: Text('Create'),
           ),
@@ -177,15 +181,19 @@ class _CreateTabState extends State<CreateTab> {
                 controller: _questionControllers[index],
                 decoration: InputDecoration(
                   labelText: 'Question',
-                  labelStyle: TextStyle(color: Colors.white), // Label text color
-                  hintStyle: TextStyle(color: Colors.white70), // Placeholder color
+                  labelStyle:
+                      TextStyle(color: Colors.white), // Label text color
+                  hintStyle:
+                      TextStyle(color: Colors.white70), // Placeholder color
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0), // Rounded border
                     borderSide: BorderSide(color: Colors.white), // Border color
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(color: Colors.white, width: 2.0), // Focused border color
+                    borderSide: BorderSide(
+                        color: Colors.white,
+                        width: 2.0), // Focused border color
                   ),
                 ),
                 style: TextStyle(color: Colors.white), // Input text color
@@ -200,15 +208,19 @@ class _CreateTabState extends State<CreateTab> {
                 controller: _answerControllers[index],
                 decoration: InputDecoration(
                   labelText: 'Answer',
-                  labelStyle: TextStyle(color: Colors.white), // Label text color
-                  hintStyle: TextStyle(color: Colors.white70), // Placeholder color
+                  labelStyle:
+                      TextStyle(color: Colors.white), // Label text color
+                  hintStyle:
+                      TextStyle(color: Colors.white70), // Placeholder color
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0), // Rounded border
                     borderSide: BorderSide(color: Colors.white), // Border color
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(color: Colors.white, width: 2.0), // Focused border color
+                    borderSide: BorderSide(
+                        color: Colors.white,
+                        width: 2.0), // Focused border color
                   ),
                 ),
                 style: TextStyle(color: Colors.white), // Input text color
@@ -230,8 +242,10 @@ class _CreateTabState extends State<CreateTab> {
   void _addCard() {
     setState(() {
       _cards.add({'question': '', 'answer': ''}); // Add a new empty card
-      _questionControllers.add(TextEditingController()); // Add a new controller for the question
-      _answerControllers.add(TextEditingController()); // Add a new controller for the answer
+      _questionControllers.add(
+          TextEditingController()); // Add a new controller for the question
+      _answerControllers
+          .add(TextEditingController()); // Add a new controller for the answer
     });
   }
 
@@ -331,12 +345,16 @@ class _CreateTabState extends State<CreateTab> {
     setState(() {
       _title = ''; // Reset title
       _description = ''; // Reset description
-      _cards = [{'question': '', 'answer': ''}]; // Reset to a single empty card
-      _selectedColor = Colors.green; // Reset color to default
+      _cards = [
+        {'question': '', 'answer': ''}
+      ]; // Reset to a single empty card
+      _selectedColor = AppColors.red; // Reset color to default
       _titleController.clear(); // Clear title input
       _descriptionController.clear(); // Clear description input
-      _questionControllers.forEach((controller) => controller.clear()); // Clear question inputs
-      _answerControllers.forEach((controller) => controller.clear()); // Clear answer inputs
+      _questionControllers
+          .forEach((controller) => controller.clear()); // Clear question inputs
+      _answerControllers
+          .forEach((controller) => controller.clear()); // Clear answer inputs
     });
   }
 }

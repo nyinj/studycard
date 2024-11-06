@@ -79,6 +79,8 @@ flutter:
     - assets/profiles/pfp4.png
     - assets/profiles/pfp5.png
     - assets/profiles/pfp6.png
+    - assets/correct.png
+    - assets/wrong.png
 
 
   # To add assets to your application, add an assets section, like this:
