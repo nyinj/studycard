@@ -65,10 +65,10 @@ class _HomeScreenState extends State<HomeScreen> {
       CreateTab(
         onDeckCreated: () {
           // Optionally handle the callback here if needed
-          // For example, refresh data or show a message
         },
         controller: _controller,
       ),
+      // Directly returning the TestTab with a simple message
       TestTab(),
       ProfileTab(),
     ];

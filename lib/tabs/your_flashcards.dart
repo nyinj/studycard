@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_model.dart';
 import 'package:studycards/flashcard_widget.dart';
+import 'package:studycards/utils/colors.dart'; // Assuming you have a constants file for AppColor
 
 class YourFlashcardsScreen extends StatefulWidget {
   final int deckId; // The selected deck ID
@@ -22,6 +23,9 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
   int _currentPage = 0; // Tracks the current page index
   List<TextEditingController> _noteControllers = []; // List to store controllers for notes
   Timer? _debounceTimer; // Timer to debounce note saving
+
+  // Track which side of the card is being shown
+  bool _isQuestionSide = true;
 
   @override
   void initState() {
@@ -137,49 +141,59 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
                 onPageChanged: (page) {
                   setState(() {
                     _currentPage = page;
+                    _isQuestionSide = true; // Reset to question side when moving to a new card
                   });
                 },
                 itemBuilder: (context, index) {
                   final flashcard = _flashcards[index];
-                  return Column(
-                    children: [
-                      FlashcardWidget(
-                        question: flashcard.question,
-                        answer: flashcard.answer,
-                        color: flashcard.color,
-                      ),
-                      SizedBox(height: 20),
 
-                      // Note section for the current card
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Notes:",
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8.0),
-                            TextField(
-                              controller: _noteControllers[index], // Controller for the current card's note
-                              maxLines: 4,
-                              decoration: InputDecoration(
-                                hintText: "Write a note here...",
-                                border: OutlineInputBorder(),
-                              ),
-                              onChanged: (note) {
-                                // Save the note with debouncing as the user types
-                                _saveNoteForFlashcard(flashcard.id!, note);
-                              },
-                            ),
-                          ],
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _isQuestionSide = !_isQuestionSide; // Toggle between question and answer side
+                      });
+                    },
+                    child: Column(
+                      children: [
+                        FlashcardWidget(
+                          question: flashcard.question,
+                          answer: flashcard.answer,
+                          color: flashcard.color,
+                          isQuestionSide: _isQuestionSide,  // Pass the current side
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 20),
+
+                        // Note section for the current card
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Notes:",
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 8.0),
+                              TextField(
+                                controller: _noteControllers[index], // Controller for the current card's note
+                                maxLines: 4,
+                                decoration: InputDecoration(
+                                  hintText: "Write a note here...",
+                                  border: OutlineInputBorder(),
+                                ),
+                                onChanged: (note) {
+                                  // Save the note with debouncing as the user types
+                                  _saveNoteForFlashcard(flashcard.id!, note);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),

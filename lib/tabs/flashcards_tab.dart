@@ -31,11 +31,19 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
 
   // Load decks
   Future<void> _loadDecks() async {
-    final decks = await _databaseHelper.getDecks();
-    setState(() {
-      _decks = decks;
-    });
-  }
+  final decks = await _databaseHelper.getDecks();
+  setState(() {
+    _decks = decks.map((deck) {
+      // Create a new map for each deck
+      int colorValue = int.tryParse(deck['color']) ?? 0xFF000000; // Default to black if parsing fails
+      // Return a new map with the additional 'color' field as a Color object
+      return {
+        ...deck, // Copy existing deck properties
+        'color': Color(colorValue), // Add the parsed color
+      };
+    }).toList();
+  });
+}
 
   // Refresh deck list
   Future<void> _refresh() async {
@@ -72,40 +80,84 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
 
             // Deck List
             Expanded(
-              child: ListView.builder(
-                itemCount: _decks.length,
-                itemBuilder: (context, index) {
-                  final deck = _decks[index];
-                  // Parse the createdAt date
-                  DateTime createdDate = DateTime.parse(deck['createdAt']);
-                  String formattedDate = DateFormat('yyyy-MM-dd').format(createdDate);
+  child: ListView.builder(
+    itemCount: _decks.length,
+    itemBuilder: (context, index) {
+      final deck = _decks[index];
+      DateTime createdDate = DateTime.parse(deck['createdAt']);
+      String formattedDate = DateFormat('yyyy-MM-dd').format(createdDate);
 
-                  return Card(
-                    child: ListTile(
-                      title: Text(deck['title']),
-                      subtitle: Text(
-                          'Cards: ${deck['number_of_cards']}, Created on: $formattedDate'), // Use formatted date
-                      trailing: IconButton(
-                        icon: Icon(Icons.delete),
-                        onPressed: () {
-                          _deleteDeck(deck['id']);
-                        },
-                      ),
-                      onTap: () {
-                        // Navigate to the flashcards screen for the selected deck
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => YourFlashcardsScreen(deckId: deck['id']),
-                          ),
-                        );
-                      },
-                    ),
-                  );
-                },
+      return Card(
+        margin: EdgeInsets.only(bottom: 16.0), // Optional: Add space between cards
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10), // Rounded corners for the card
+        ),
+        elevation: 5, // Shadow effect
+        child: Container(
+          decoration: BoxDecoration(
+            color: deck['color'], // Set the background color for the deck card
+            borderRadius: BorderRadius.circular(20), // Same radius as the card
+            border: Border.all(
+              color: Colors.black, // Black border color
+              width: 1, // Thin border
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2), // Shadow color
+                offset: Offset(0, 4), // Shadow offset (x, y)
+                blurRadius: 6, // Blur radius for the shadow
+              ),
+            ],
+          ),
+          child: ListTile(
+            title: Text(
+              deck['title'],
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold, // Bold the title
+                fontSize: 20, // Increase the font size for the title
               ),
             ),
-          ],
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cards: ${deck['number_of_cards']}',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16, // Adjust subtitle font size
+                  ),
+                ),
+                SizedBox(height: 4), // Space between lines
+                Text(
+                  'Created on: $formattedDate',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14, // Slightly smaller font size for the date
+                  ),
+                ),
+              ],
+            ),
+            trailing: IconButton(
+              icon: Icon(Icons.delete, color: Colors.white), // Optional: Set delete icon color
+              onPressed: () {
+                _deleteDeck(deck['id']);
+              },
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => YourFlashcardsScreen(deckId: deck['id']),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+    },
+  ),
+),],
         ),
       ),
     );
