@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:studycards/flashcard_model.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_widget.dart';
+import 'package:studycards/main.dart';
+import 'package:studycards/tabs/home_tab.dart';
 import 'package:studycards/tabs/test_tab.dart';
 
 class YourTestScreen extends StatefulWidget {
@@ -33,6 +35,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
   @override
   void initState() {
     super.initState();
+    print("Initializing YourTestScreen...");
     _databaseHelper = DatabaseHelper();
     _loadDeckAndFlashcards();
     _remainingTime = widget.timerDuration;
@@ -40,20 +43,24 @@ class _YourTestScreenState extends State<YourTestScreen> {
   }
 
   Future<void> _loadDeckAndFlashcards() async {
-    final flashcards =
-        await _databaseHelper.getFlashcardsByDeckId(widget.deckId);
+    print("Loading flashcards for deckId: ${widget.deckId}...");
+    final flashcards = await _databaseHelper.getFlashcardsByDeckId(widget.deckId);
     setState(() {
       _flashcards = flashcards;
     });
+    print("Loaded ${_flashcards.length} flashcards.");
   }
 
   void _startTimer() {
+    print("Starting timer with duration: ${widget.timerDuration}...");
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         setState(() {
           _remainingTime -= Duration(seconds: 1);
         });
+        print("Timer tick: $_remainingTime");
       } else {
+        print("Timer finished, showing results dialog.");
         _timer.cancel();
         _showResultsDialog();
       }
@@ -62,16 +69,17 @@ class _YourTestScreenState extends State<YourTestScreen> {
 
   @override
   void dispose() {
+    print("Disposing YourTestScreen...");
     _timer.cancel();
     super.dispose();
   }
 
   void _selectAnswer(bool isCorrect) {
+    print("Answer selected: ${isCorrect ? 'Correct' : 'Wrong'}");
     setState(() {
       if (!_hasSelected) {
         _hasSelected = true; // Prevent selecting more than once
-        _selectedIsCorrect =
-            isCorrect; // Track if the selected answer is correct
+        _selectedIsCorrect = isCorrect; // Track if the selected answer is correct
         if (isCorrect) {
           _correctCount++; // Increment correct answer count
         } else {
@@ -82,48 +90,65 @@ class _YourTestScreenState extends State<YourTestScreen> {
   }
 
   void _nextCard() {
+    print("Moving to next card. Current index: $_currentIndex...");
     setState(() {
       if (_currentIndex < _flashcards.length - 1) {
         _currentIndex++;
         _hasSelected = false;
         _selectedIsCorrect = false; // Reset the selection indicator
+        print("Next card: $_currentIndex");
       } else {
+        print("All cards completed, showing results dialog.");
         _timer.cancel();
         _showResultsDialog();
       }
     });
   }
 
-  void _showResultsDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Test Completed"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Correct Answers: $_correctCount"),
-              Text("Wrong Answers: $_wrongCount"),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-                // Navigate back to the TestTab without replacing the navigation stack
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-              child: Text("OK"),
-            ),
+ void _showResultsDialog() {
+  print("Showing results dialog with $_correctCount correct and $_wrongCount wrong answers.");
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Test Completed"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("Correct Answers: $_correctCount"),
+            Text("Wrong Answers: $_wrongCount"),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              print("Closing dialog...");
+              Navigator.pop(context); // Close the dialog
+              print("Dialog closed. Now navigating to HomeScreen with TestTab selected...");
+
+              // This resets the stack and goes to HomeScreen, setting TestTab as active
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomeScreen(initialIndex: 3), // Set index to 3 for TestTab
+                ),
+              );
+
+              print("Navigated to HomeScreen with TestTab.");
+            },
+            child: Text("OK"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
 
   @override
   Widget build(BuildContext context) {
+    print("Building YourTestScreen...");
     return Scaffold(
       appBar: _buildAppBar(),
       body: Padding(
@@ -165,6 +190,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
   }
 
   Widget _buildFlashcardContent() {
+    print("Building flashcard content for card ${_currentIndex + 1}...");
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -175,12 +201,13 @@ class _YourTestScreenState extends State<YourTestScreen> {
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 20),
-          // No swipe, simple single flashcard display
+          // Pass a new key each time to force a rebuild of the FlashcardWidget
           FlashcardWidget(
+            key: ValueKey(_currentIndex),  // This ensures that each card is always reset
             question: _flashcards[_currentIndex].question,
             answer: _flashcards[_currentIndex].answer,
             color: _flashcards[_currentIndex].color,
-            isQuestionSide: true,
+            isQuestionSide: true,  // Always start with the question side
           ),
           SizedBox(height: 20),
           Row(
