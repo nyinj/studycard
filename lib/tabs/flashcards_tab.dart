@@ -69,15 +69,6 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
           children: [
             CustomTitle(title: 'Your Flashcards'),
             SizedBox(height: 20),
-
-            // Button to create a new deck
-            ElevatedButton(
-              onPressed: () {
-                widget.controller.jumpToTab(2);
-              },
-              child: Text('Create Deck'),
-            ),
-
             // Deck List
             Expanded(
   child: ListView.builder(

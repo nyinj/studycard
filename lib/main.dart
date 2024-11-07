@@ -43,7 +43,9 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialIndex = 0});
+
+  final int initialIndex; // Add a parameter to set the initial tab index.
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -55,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = PersistentTabController(initialIndex: 0);
+    _controller = PersistentTabController(initialIndex: widget.initialIndex);  // Use the passed index
   }
 
   List<Widget> _buildScreens() {
@@ -63,12 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
       HomeTab(),
       FlashcardsTab(controller: _controller),
       CreateTab(
-        onDeckCreated: () {
-          // Optionally handle the callback here if needed
-        },
+        onDeckCreated: () {},
         controller: _controller,
       ),
-      // Directly returning the TestTab with a simple message
       TestTab(),
       ProfileTab(),
     ];
