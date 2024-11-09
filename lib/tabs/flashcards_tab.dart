@@ -95,7 +95,7 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
             CustomTitle(title: 'Your Flashcards'),
             SizedBox(height: 20),
             // Display the total flashcards count
-            
+
             SizedBox(height: 20),
             Expanded(
               child: ListView.builder(

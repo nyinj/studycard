@@ -6,6 +6,7 @@ import 'package:studycards/flashcard_widget.dart';
 import 'package:studycards/main.dart';
 import 'package:studycards/tabs/home_tab.dart';
 import 'package:studycards/tabs/test_tab.dart';
+import 'package:studycards/utils/colors.dart'; // Assuming AppColors.dart is available
 
 class YourTestScreen extends StatefulWidget {
   final int deckId;
@@ -61,9 +62,9 @@ class _YourTestScreenState extends State<YourTestScreen> {
         });
         print("Timer tick: $_remainingTime");
       } else {
-        print("Timer finished, showing results dialog.");
+        print("Timer finished, showing end screen.");
         _timer.cancel();
-        _showResultsDialog();
+        _showEndScreen();
       }
     });
   }
@@ -100,39 +101,38 @@ class _YourTestScreenState extends State<YourTestScreen> {
         _selectedIsCorrect = false; // Reset the selection indicator
         print("Next card: $_currentIndex");
       } else {
-        print("All cards completed, showing results dialog.");
+        print("All cards completed, showing end screen.");
         _timer.cancel();
-        _showResultsDialog();
+        _showEndScreen();
       }
     });
   }
 
-  void _storeTestResults() async {
-    // Store the test results in the database.
-    DateTime timestamp = DateTime.now();
-    await _databaseHelper.storeTestResult(
-      _correctCount,
-      _wrongCount,
-      _flashcards.length, // Total number of questions in the test
-      timestamp,
-    );
-    print("Test results stored.");
-  }
-
-  void _showResultsDialog() {
+  void _showEndScreen() {
+    double score = (_correctCount / (_correctCount + _wrongCount)) * 100;
+    _databaseHelper.saveTestResult(
+        widget.deckId, _correctCount, _wrongCount, score);
     print(
-        "Showing results dialog with $_correctCount correct and $_wrongCount wrong answers.");
-    _storeTestResults(); // Save the results
+        "Showing end screen with $_correctCount correct and $_wrongCount wrong answers.");
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text("Test Completed"),
+          title: Text(
+            "Test Completed",
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Correct Answers: $_correctCount"),
-              Text("Wrong Answers: $_wrongCount"),
+              Text(
+                "Correct Answers: $_correctCount",
+                style: TextStyle(fontSize: 18, color: AppColors.blueish),
+              ),
+              Text(
+                "Wrong Answers: $_wrongCount",
+                style: TextStyle(fontSize: 18, color: AppColors.red),
+              ),
             ],
           ),
           actions: [
@@ -140,10 +140,6 @@ class _YourTestScreenState extends State<YourTestScreen> {
               onPressed: () {
                 print("Closing dialog...");
                 Navigator.pop(context); // Close the dialog
-                print(
-                    "Dialog closed. Now navigating to HomeScreen with TestTab selected...");
-
-                // This resets the stack and goes to HomeScreen, setting TestTab as active
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
@@ -151,10 +147,11 @@ class _YourTestScreenState extends State<YourTestScreen> {
                         initialIndex: 2), // Set index to 3 for TestTab
                   ),
                 );
-
-                print("Navigated to HomeScreen with TestTab.");
               },
-              child: Text("OK"),
+              child: Text(
+                "OK",
+                style: TextStyle(color: AppColors.blue),
+              ),
             ),
           ],
         );
@@ -167,6 +164,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
     print("Building YourTestScreen...");
     return Scaffold(
       appBar: _buildAppBar(),
+      backgroundColor: Colors.white, // Background color for the screen
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _flashcards.isEmpty
@@ -178,7 +176,17 @@ class _YourTestScreenState extends State<YourTestScreen> {
 
   AppBar _buildAppBar() {
     return AppBar(
-      title: Text('Test Your Recall'),
+      title: Text(
+        'Test Your Recall',
+        style: TextStyle(
+          fontSize: 24, // Custom font size
+          fontWeight: FontWeight.bold, // Custom bold font weight
+          color: AppColors.blueish, // Use the custom color from AppColors
+        ),
+      ),
+      backgroundColor:
+          AppColors.blue, // Using AppColors.blue for the AppBar background
+      elevation: 4,
       actions: [
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -236,14 +244,14 @@ class _YourTestScreenState extends State<YourTestScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     border: _hasSelected && !_selectedIsCorrect
-                        ? Border.all(color: Colors.red, width: 3)
+                        ? Border.all(color: AppColors.red, width: 3)
                         : null,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Image.asset(
                     'assets/wrong.png',
-                    width: 40,
-                    height: 40,
+                    width: 50,
+                    height: 50,
                   ),
                 ),
               ),
@@ -254,14 +262,14 @@ class _YourTestScreenState extends State<YourTestScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     border: _hasSelected && _selectedIsCorrect
-                        ? Border.all(color: Colors.green, width: 3)
+                        ? Border.all(color: AppColors.blueish, width: 3)
                         : null,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Image.asset(
                     'assets/correct.png',
-                    width: 40,
-                    height: 40,
+                    width: 50,
+                    height: 50,
                   ),
                 ),
               ),
@@ -271,7 +279,15 @@ class _YourTestScreenState extends State<YourTestScreen> {
           if (_hasSelected)
             ElevatedButton(
               onPressed: _nextCard,
-              child: Text('Next'),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                backgroundColor:
+                    AppColors.blue, // Using AppColors.blue for button color
+              ),
+              child: Text(
+                'Next',
+                style: TextStyle(fontSize: 18, color: Colors.white),
+              ),
             ),
         ],
       ),

@@ -1,8 +1,17 @@
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
-import 'package:studycards/flashcard_model.dart';
 import 'package:studycards/utils/colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+Future<int> _getLastResetMonth() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('last_reset_month') ?? -1; // Default to -1 if not set
+}
+
+Future<void> _setLastResetMonth(int month) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setInt('last_reset_month', month);
+}
 
 class ProfilePerformance extends StatefulWidget {
   @override
@@ -11,126 +20,108 @@ class ProfilePerformance extends StatefulWidget {
 
 class _ProfilePerformanceState extends State<ProfilePerformance> {
   int _flashcardsCreated = 0;
+  int _totalDecksCount = 0;
   int _testsTaken = 0;
-  int _totalDecksCount = 0; // Track total number of decks
-  List<String> _flashcardNames = []; // List to store flashcard names
-  Map<String, int> _flashcardScores = {}; // Store flashcard scores
+  double _averageTestScore = 0.0;
+  int _highScoreFlashcards = 0;
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
-  // Method to fetch performance data from the database
   Future<void> _fetchPerformanceData() async {
-    Map<String, int> performanceData = await _databaseHelper
-        .getPerformanceData(''); // Fetch data without time frame
+    // Fetch the current month
+    int currentMonth = DateTime.now().month;
 
-    // Get the total test results count
-    int totalTestResults = await _databaseHelper.getTotalTestResultsCount();
+    // Get the last reset month from SharedPreferences
+    int lastResetMonth = await _getLastResetMonth();
 
-    // Log the total test results count
-    print('Total Test Results: $totalTestResults');
+    // If the month has changed, reset the data
+    if (currentMonth != lastResetMonth) {
+      await _resetPerformanceData();
+      await _setLastResetMonth(currentMonth); // Update the reset month
+    }
+
+    // Continue fetching performance data
+    Map<String, int> performanceData =
+        await _databaseHelper.getPerformanceData('');
+    int testsTaken = await _databaseHelper.getTotalTestResultsCount();
+    double averageScore = await _getAverageTestScore();
+    int highScoreCount = await _getHighScoreFlashcardsCount();
 
     setState(() {
       _flashcardsCreated = performanceData['flashcards_created'] ?? 0;
-      _testsTaken =
-          totalTestResults; // Set the fetched total test results count
+      _testsTaken = testsTaken;
+      _averageTestScore = averageScore;
+      _highScoreFlashcards = highScoreCount;
     });
   }
 
-  // Method to load decks and count the total number of decks
+  Future<void> _resetPerformanceData() async {
+    final db = await _databaseHelper.database;
+
+    // Reset flashcards count or any data you need to reset
+    await db.update(
+      'flashcards',
+      {'score': 0}, // Reset specific columns
+      where: 'score >= ?',
+      whereArgs: [0],
+    );
+
+    // Optionally, reset test results
+    await db.delete('test_results');
+  }
+
   Future<void> _loadDecks() async {
     final decks = await _databaseHelper.getDecks();
     setState(() {
-      _totalDecksCount = decks.length; // Count the total number of decks
+      _totalDecksCount = decks.length;
     });
   }
 
-  // Method to load flashcards and their scores
-  Future<void> _loadFlashcards() async {
-    // Fetch flashcards from the database
-    List<Map<String, dynamic>> flashcards =
-        await _databaseHelper.getFlashcardsWithScores();
+  Future<double> _getAverageTestScore() async {
+    final db = await _databaseHelper.database;
+    List<Map<String, dynamic>> results = await db.query('test_results');
+    if (results.isEmpty) return 0.0;
 
-    // Log the fetched data for debugging
-    print("Fetched Flashcards: $flashcards");
+    double totalScore =
+        results.fold(0, (sum, row) => sum + row['percentage_score']);
+    return totalScore / results.length;
+  }
 
-    setState(() {
-      // Collect the names and scores of flashcards
-      _flashcardNames =
-          flashcards.map((flashcard) => flashcard['title'].toString()).toList();
-      _flashcardScores = {
-        for (var flashcard in flashcards) flashcard['title']: flashcard['score']
-      };
-    });
+  Future<int> _getHighScoreFlashcardsCount() async {
+    final db = await _databaseHelper.database;
+    List<Map<String, dynamic>> results = await db.query(
+      'flashcards',
+      where: 'score >= ?',
+      whereArgs: [80], // Change 80 to any threshold you prefer
+    );
+    return results.length;
   }
 
   @override
   void initState() {
     super.initState();
-    _fetchPerformanceData(); // Initial fetch when the widget is created
-    _loadDecks(); // Load decks and get the total count
-    _loadFlashcards(); // Load flashcards and their scores
+    _fetchPerformanceData();
+    _loadDecks();
   }
 
-  // Method to build statistic cards
-  Widget _buildStatisticCard(String label, String value) {
+  Widget _buildStatisticCard(String label, String value, {Color? color}) {
     return Card(
-      color: Colors.grey[200],
+      elevation: 4,
+      color: color ?? Colors.grey[200],
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Padding(
-        padding: EdgeInsets.all(8),
+        padding: EdgeInsets.all(16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(value, style: TextStyle(fontSize: 20)),
+            Text(label,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            SizedBox(height: 8),
+            Text(value, style: TextStyle(fontSize: 20, color: Colors.black)),
           ],
         ),
       ),
-    );
-  }
-
-  // Method to build flashcard score display
-  Widget _buildFlashcardScores() {
-    return Column(
-      children: [
-        if (_flashcardNames.isEmpty)
-          Center(
-            child: Text(
-              'No flashcards available',
-              style: TextStyle(color: Colors.grey, fontSize: 16),
-            ),
-          )
-        else
-          // Show flashcards and their scores
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: _flashcardNames.length,
-            itemBuilder: (context, index) {
-              String flashcardTitle = _flashcardNames[index];
-              int flashcardScore = _flashcardScores[flashcardTitle] ?? 0;
-
-              return Card(
-                color: AppColors.blueish,
-                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                child: ListTile(
-                  title: Text(
-                    flashcardTitle,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  subtitle: Text(
-                    'Score: $flashcardScore%',
-                    style: TextStyle(fontSize: 16, color: Colors.white),
-                  ),
-                ),
-              );
-            },
-          ),
-      ],
     );
   }
 
@@ -138,132 +129,36 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Performance analysis card with flashcards created and tests taken
+          // Header Card
           Card(
             elevation: 4,
             color: AppColors.red,
-            margin: EdgeInsets.symmetric(vertical: 8),
+            margin: EdgeInsets.all(16),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Column(
                 children: [
-                  Text(
-                    'Performance Analysis',
-                    style: TextStyle(
+                  Center(
+                    child: Text(
+                      'Performance Analysis',
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildStatisticCard(
-                          'Flashcards Created', _totalDecksCount.toString()),
-                      _buildStatisticCard('Tests Taken', _testsTaken.toString())
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Flashcard scores list
-          Card(
-            elevation: 4,
-            color: AppColors.orange,
-            margin: EdgeInsets.symmetric(vertical: 8),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Flashcard Scores',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white),
-                  ),
-                  SizedBox(height: 10),
-                  _buildFlashcardScores(), // Display all flashcard scores
-                ],
-              ),
-            ),
-          ),
-
-          // Weekly performance chart
-          Card(
-            elevation: 4,
-            color: AppColors.blue,
-            margin: EdgeInsets.symmetric(vertical: 8),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Text(
-                    'Weekly Performance Chart',
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: 200,
-                    child: LineChart(
-                      LineChartData(
-                        gridData: FlGridData(show: true),
-                        titlesData: FlTitlesData(
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              getTitlesWidget: (value, _) {
-                                return Text(
-                                  'Week ${value.toInt()}',
-                                  style: TextStyle(
-                                      fontSize: 10, color: Colors.white),
-                                );
-                              },
-                            ),
-                          ),
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              getTitlesWidget: (value, _) {
-                                return Text(
-                                  '${value.toInt()}',
-                                  style: TextStyle(
-                                      fontSize: 10, color: Colors.white),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        borderData: FlBorderData(show: false),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: [
-                              FlSpot(0, 50),
-                              FlSpot(1, 70),
-                              FlSpot(2, 80),
-                              FlSpot(3, 60),
-                              FlSpot(4, 90),
-                              FlSpot(5, 85),
-                            ],
-                            isCurved: true,
-                            barWidth: 4,
-                            color: Colors.white,
-                            dotData: FlDotData(show: false),
-                          ),
-                        ],
+                  SizedBox(height: 8), // Space between title and subtitle
+                  Center(
+                    child: Text(
+                      'Resets every month',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70, // Lighter color for subtitle
                       ),
                     ),
                   ),
@@ -271,6 +166,13 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
               ),
             ),
           ),
+          // Individual Statistic Cards
+          _buildStatisticCard(
+              'Flashcards Created', _flashcardsCreated.toString()),
+          _buildStatisticCard('Total Decks', _totalDecksCount.toString()),
+          _buildStatisticCard('Tests Taken', _testsTaken.toString()),
+          _buildStatisticCard(
+              'Average Test Score', '${_averageTestScore.toStringAsFixed(1)}%'),
         ],
       ),
     );

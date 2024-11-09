@@ -44,21 +44,23 @@ class DatabaseHelper {
             color TEXT,
             deckId INTEGER,
             createdAt TEXT,
-            score INTEGER DEFAULT 0,  // Added score column
+            score INTEGER DEFAULT 0,  
             note TEXT,
             FOREIGN KEY (deckId) REFERENCES decks (id)
           )
         ''');
 
         await db.execute('''
-          CREATE TABLE test_results (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            correct_count INTEGER,
-            wrong_count INTEGER,
-            percentage_score INTEGER,
-            timestamp TEXT
-          )
-        ''');
+  CREATE TABLE test_results (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    deck_id INTEGER, 
+    correct_count INTEGER,
+    wrong_count INTEGER,
+    percentage_score REAL,  
+    timestamp TEXT,
+    FOREIGN KEY (deck_id) REFERENCES decks (id)
+  )
+''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 5) {
@@ -71,29 +73,39 @@ class DatabaseHelper {
     );
   }
 
-  // Method to save test results
-  Future<void> storeTestResult(
-    int correctCount,
-    int wrongCount,
-    int totalQuestions,
-    DateTime timestamp,
-) async {
-    final score = (correctCount / totalQuestions) * 100; // Calculate the score
+  // Method to save a flashcard
+  Future<int> saveFlashcard(Flashcard flashcard) async {
     final db = await database;
-    await db.insert(
+    try {
+      return await db.insert('flashcards', flashcard.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    } catch (e) {
+      print("Error saving flashcard: $e");
+      rethrow; // Optionally handle errors more gracefully.
+    }
+  }
+
+  // Method to save test results
+  Future<void> saveTestResult(
+      int deckId, int correctCount, int wrongCount, double score) async {
+    final db = await database;
+    try {
+      await db.insert(
         'test_results',
         {
+          'deck_id': deckId,
           'correct_count': correctCount,
           'wrong_count': wrongCount,
-          'total_questions': totalQuestions,
-          'score': score,  // Store the score
-          'timestamp': timestamp.toIso8601String(),
+          'percentage_score': score,
+          'timestamp': DateTime.now().toIso8601String(),
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
-    );
-    print("Test result stored with score: $score");
-}
-
+      );
+      print("Test result saved successfully");
+    } catch (e) {
+      print("Error saving test result: $e");
+    }
+  }
 
   // Method to get the count of flashcards in a deck
   Future<int> getFlashcardsCountByDeck(int deckId) async {
@@ -191,6 +203,20 @@ class DatabaseHelper {
     );
   }
 
+  Future<Object> getAverageTestScore() async {
+    final db = await database;
+    final result = await db.rawQuery(
+        'SELECT AVG(percentage_score) as average_score FROM test_results');
+    return result[0]['average_score'] ?? 0.0;
+  }
+
+  Future<Object> getAverageFlashcardScore() async {
+    final db = await database;
+    final result =
+        await db.rawQuery('SELECT AVG(score) as average_score FROM flashcards');
+    return result[0]['average_score'] ?? 0.0;
+  }
+
   // Method to update flashcard note
   Future<void> updateFlashcardNote(int flashcardId, String note) async {
     final db = await database;
@@ -241,30 +267,25 @@ class DatabaseHelper {
 
     // Determine the start date based on the selected time frame
     if (timeFrame == 'Today') {
-      startDate = DateTime(now.year, now.month, now.day); // Start of today
+      startDate = DateTime(now.year, now.month, now.day);
     } else if (timeFrame == 'This Week') {
       int weekday = now.weekday;
-      startDate =
-          now.subtract(Duration(days: weekday - 1)); // Start of the week
+      startDate = now.subtract(Duration(days: weekday - 1));
     } else {
-      // 'This Month'
-      startDate = DateTime(now.year, now.month, 1); // Start of the month
+      startDate = DateTime(now.year, now.month, 1);
     }
 
-    // Get all test results from the database after the start date
     List<Map<String, dynamic>> results = await db.query(
       'test_results',
       where: 'timestamp >= ?',
       whereArgs: [startDate.toIso8601String()],
     );
 
-    // Count the number of tests taken
-    int testsTaken = results.length;
+    print("Retrieved ${results.length} test results");
 
-    // Fetch the number of flashcards created (using your existing methods)
+    int testsTaken = results.length;
     int flashcardsCreated = await getDistinctFlashcardsTitlesCount();
 
-    // Return the performance data
     return {
       'flashcards_created': flashcardsCreated,
       'tests_taken': testsTaken,
