@@ -21,6 +21,7 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
   late final DatabaseHelper _databaseHelper;
   List<Map<String, dynamic>> _decks = [];
   int? _selectedDeckId;
+  Map<int, int> _flashcardsCount = {};  // Map to store flashcards count per deck
 
   @override
   void initState() {
@@ -31,19 +32,24 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
 
   // Load decks
   Future<void> _loadDecks() async {
-  final decks = await _databaseHelper.getDecks();
-  setState(() {
-    _decks = decks.map((deck) {
-      // Create a new map for each deck
-      int colorValue = int.tryParse(deck['color']) ?? 0xFF000000; // Default to black if parsing fails
-      // Return a new map with the additional 'color' field as a Color object
-      return {
-        ...deck, // Copy existing deck properties
-        'color': Color(colorValue), // Add the parsed color
-      };
-    }).toList();
-  });
-}
+    final decks = await _databaseHelper.getDecks();
+    for (var deck in decks) {
+      int deckId = deck['id'];
+      int flashcardsCreated = await _databaseHelper.getFlashcardsCountByDeck(deckId);
+      setState(() {
+        _flashcardsCount[deckId] = flashcardsCreated;
+      });
+    }
+    setState(() {
+      _decks = decks.map((deck) {
+        int colorValue = int.tryParse(deck['color']) ?? 0xFF000000;
+        return {
+          ...deck,
+          'color': Color(colorValue),
+        };
+      }).toList();
+    });
+  }
 
   // Refresh deck list
   Future<void> _refresh() async {
@@ -52,8 +58,8 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
 
   // Delete deck
   Future<void> _deleteDeck(int id) async {
-    await _databaseHelper.deleteDeck(id); // Call the method from DatabaseHelper
-    _loadDecks(); // Refresh deck list after deletion
+    await _databaseHelper.deleteDeck(id);
+    _loadDecks();
   }
 
   @override
@@ -69,86 +75,88 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
           children: [
             CustomTitle(title: 'Your Flashcards'),
             SizedBox(height: 20),
-            // Deck List
             Expanded(
-  child: ListView.builder(
-    itemCount: _decks.length,
-    itemBuilder: (context, index) {
-      final deck = _decks[index];
-      DateTime createdDate = DateTime.parse(deck['createdAt']);
-      String formattedDate = DateFormat('yyyy-MM-dd').format(createdDate);
+              child: ListView.builder(
+                itemCount: _decks.length,
+                itemBuilder: (context, index) {
+                  final deck = _decks[index];
+                  DateTime createdDate = DateTime.parse(deck['createdAt']);
+                  String formattedDate = DateFormat('yyyy-MM-dd').format(createdDate);
 
-      return Card(
-        margin: EdgeInsets.only(bottom: 16.0), // Optional: Add space between cards
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Rounded corners for the card
-        ),
-        elevation: 5, // Shadow effect
-        child: Container(
-          decoration: BoxDecoration(
-            color: deck['color'], // Set the background color for the deck card
-            borderRadius: BorderRadius.circular(20), // Same radius as the card
-            border: Border.all(
-              color: Colors.black, // Black border color
-              width: 1, // Thin border
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2), // Shadow color
-                offset: Offset(0, 4), // Shadow offset (x, y)
-                blurRadius: 6, // Blur radius for the shadow
+                  int flashcardCount = _flashcardsCount[deck['id']] ?? 0;
+
+                  return Card(
+                    margin: EdgeInsets.only(bottom: 16.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 5,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: deck['color'],
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.black,
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            offset: Offset(0, 4),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          deck['title'],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Cards: $flashcardCount',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Created on: $formattedDate',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete, color: Colors.white),
+                          onPressed: () {
+                            _deleteDeck(deck['id']);
+                          },
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => YourFlashcardsScreen(deckId: deck['id']),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
-          child: ListTile(
-            title: Text(
-              deck['title'],
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold, // Bold the title
-                fontSize: 20, // Increase the font size for the title
-              ),
             ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Cards: ${deck['number_of_cards']}',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16, // Adjust subtitle font size
-                  ),
-                ),
-                SizedBox(height: 4), // Space between lines
-                Text(
-                  'Created on: $formattedDate',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14, // Slightly smaller font size for the date
-                  ),
-                ),
-              ],
-            ),
-            trailing: IconButton(
-              icon: Icon(Icons.delete, color: Colors.white), // Optional: Set delete icon color
-              onPressed: () {
-                _deleteDeck(deck['id']);
-              },
-            ),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => YourFlashcardsScreen(deckId: deck['id']),
-                ),
-              );
-            },
-          ),
-        ),
-      );
-    },
-  ),
-),],
+          ],
         ),
       ),
     );

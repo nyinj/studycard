@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/main.dart';
+import 'package:studycards/utils/colors.dart';
+import 'package:studycards/tabs/custom_title.dart';  // Import your CustomTitle widget
 
 class UsernameScreen extends StatefulWidget {
   final bool isEditMode;
   final Function(String, String) onSave;
 
-  // Constructor to accept edit mode flag and callback
   UsernameScreen({this.isEditMode = false, required this.onSave});
 
   @override
@@ -28,7 +29,6 @@ class _UsernameScreenState extends State<UsernameScreen> {
   @override
   void initState() {
     super.initState();
-    print("UsernameScreen initialized with edit mode: ${widget.isEditMode}");
     if (widget.isEditMode) {
       _loadProfileData();
     }
@@ -36,51 +36,33 @@ class _UsernameScreenState extends State<UsernameScreen> {
 
   // Load profile data from SharedPreferences
   Future<void> _loadProfileData() async {
-    print("Loading profile data...");
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      setState(() {
-        _usernameController.text = prefs.getString('username') ?? '';
-        _selectedPfp = prefs.getString('profile_picture') ?? _pfpList.first;
-      });
-      print("Profile data loaded: Username - ${_usernameController.text}, "
-          "Profile Picture - $_selectedPfp");
-    } catch (e) {
-      print("Error loading profile data: $e");
-    }
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _usernameController.text = prefs.getString('username') ?? '';
+      _selectedPfp = prefs.getString('profile_picture') ?? _pfpList.first;
+    });
   }
 
-  // Save the updated profile data
-  // Inside _saveData method in UsernameScreen
   void _saveData() async {
-    print("Saving profile data...");
     if (_usernameController.text.isNotEmpty && _selectedPfp != null) {
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('username', _usernameController.text);
-        await prefs.setString('profile_picture', _selectedPfp!);
-        print("Profile data saved successfully.");
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username', _usernameController.text);
+      await prefs.setString('profile_picture', _selectedPfp!);
 
-        widget.onSave(_usernameController.text, _selectedPfp!);
+      widget.onSave(_usernameController.text, _selectedPfp!);
 
-        if (widget.isEditMode) {
-          Navigator.pop(context, {
-            'username': _usernameController.text,
-            'profile_picture': _selectedPfp,
-          });
-        } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-                builder: (context) =>
-                    HomeScreen()), // Update HomeScreen to your main screen widget
-          );
-        }
-      } catch (e) {
-        print("Error saving profile data: $e");
+      if (widget.isEditMode) {
+        Navigator.pop(context, {
+          'username': _usernameController.text,
+          'profile_picture': _selectedPfp,
+        });
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       }
     } else {
-      print("Profile data incomplete: Username or Profile Picture is missing.");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please enter a username and select a picture')),
       );
@@ -89,56 +71,152 @@ class _UsernameScreenState extends State<UsernameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("Building UsernameScreen UI...");
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isEditMode
-            ? 'Edit Profile'
-            : 'Set Username & Profile Picture'),
+        // Replace Text widget with CustomTitle in the AppBar
+        title: CustomTitle(
+          title: widget.isEditMode ? 'Edit Profile' : 'Set Your Profile',
+        ),
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
-            ),
-            SizedBox(height: 20),
-            GridView.builder(
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-              itemCount: _pfpList.length,
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedPfp = _pfpList[index];
-                      print("Selected profile picture: $_selectedPfp");
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: _selectedPfp == _pfpList[index]
-                            ? Colors.blue
-                            : Colors.grey,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                widget.isEditMode ? 'Edit your profile' : 'Create your profile',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.red,
+                ),
+              ),
+              SizedBox(height: 20),
+
+              // Username TextField with styling
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(
+                  labelText: 'Username',
+                  labelStyle: TextStyle(
+                    color: AppColors.blue, // Label color when the field is active
+                    fontSize: 16,
+                  ),
+                  hintText: 'Enter your username',
+                  hintStyle: TextStyle(
+                    color: Colors.grey[500], // Lighter text for hint
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12), // Rounded corners for the border
+                    borderSide: BorderSide(color: Colors.grey[300]!), // Subtle border color
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: AppColors.blueish, width: 2), // Focused border color
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // Default border color
+                  ),
+                  filled: true,
+                  fillColor: Colors.white, // Background color of the TextField
+                  contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16), // Padding inside the TextField
+                  suffixIcon: _usernameController.text.isNotEmpty
+                      ? IconButton(
+                          icon: Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              _usernameController.clear();
+                            });
+                          },
+                        )
+                      : null, // Clear icon appears when there is text inside
+                ),
+              ),
+
+              SizedBox(height: 30), // Increased space between username and profile picture selection
+
+              // Profile Picture selection
+              Text(
+                'Select Profile Picture',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[700],
+                ),
+              ),
+              SizedBox(height: 10),
+              GridView.builder(
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 16.0,
+                  mainAxisSpacing: 16.0,
+                ),
+                itemCount: _pfpList.length,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) {
+                  final isSelected = _selectedPfp == _pfpList[index];
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedPfp = _pfpList[index];
+                      });
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected ? AppColors.orange : Colors.transparent,
+                          width: 2.0,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 2,
+                            blurRadius: 4,
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          _pfpList[index],
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
-                    child: Image.asset(_pfpList[index]),
+                  );
+                },
+              ),
+
+              SizedBox(height: 30), // Space before the save button
+
+              // Save Button
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveData,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.blue,
+                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
-                );
-              },
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _saveData,
-              child: Text(widget.isEditMode ? 'Update' : 'Save'),
-            ),
-          ],
+                  child: Text(
+                    widget.isEditMode ? 'Update' : 'Save',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

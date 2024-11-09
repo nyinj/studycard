@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:studycards/utils/colors.dart';
+import 'package:studycards/database_helper.dart';
 
 class ProfilePerformance extends StatefulWidget {
   @override
@@ -12,15 +13,29 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
   String _selectedFlashcard = 'Flashcard 1';
   List<String> _flashcardOptions = ['Flashcard 1', 'Flashcard 2'];
   List<int> _flashcardScores = [85, 90, 75];
-  int _flashcardsCreated = 10;
-  int _testsTaken = 5;
+  int _flashcardsCreated = 0;
+  int _testsTaken = 0;
 
+  final DatabaseHelper _databaseHelper = DatabaseHelper();
+
+  // Method to fetch performance data from the database
+  Future<void> _fetchPerformanceData() async {
+    Map<String, int> performanceData = await _databaseHelper.getPerformanceData(_selectedTimeFrame);
+    setState(() {
+      _flashcardsCreated = performanceData['flashcards_created'] ?? 0;
+      _testsTaken = performanceData['tests_taken'] ?? 0;
+    });
+  }
+
+  // Update the time frame and fetch the new performance data
   void _updateTimeFrame(String timeFrame) {
     setState(() {
       _selectedTimeFrame = timeFrame;
     });
+    _fetchPerformanceData(); // Fetch new data for the selected time frame
   }
 
+  // Method to build statistic cards
   Widget _buildStatisticCard(String label, String value) {
     return Card(
       color: AppColors.greyish,
@@ -37,12 +52,45 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
     );
   }
 
+  // Method to build flashcard score display
+  Widget _buildFlashcardScores() {
+    return SizedBox(
+      height: 50,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: _flashcardScores.length,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4),
+            child: Card(
+              color: AppColors.blueish,
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: Text(
+                  'Score ${index + 1}: ${_flashcardScores[index]}%',
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPerformanceData(); // Initial fetch when the widget is created
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Performance analysis card with time frame buttons
           Card(
             elevation: 4,
             color: AppColors.red,
@@ -90,6 +138,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
               ),
             ),
           ),
+          // Flashcard selection and scores
           Card(
             elevation: 4,
             color: AppColors.orange,
@@ -126,33 +175,12 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
                     }).toList(),
                   ),
                   SizedBox(height: 10),
-                  SizedBox(
-                    height: 50,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _flashcardScores.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
-                          child: Card(
-                            color: AppColors.blueish,
-                            child: Padding(
-                              padding: EdgeInsets.all(8),
-                              child: Text(
-                                'Score ${index + 1}: ${_flashcardScores[index]}%',
-                                style: TextStyle(
-                                    fontSize: 16, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  _buildFlashcardScores(), // Display flashcard scores
                 ],
               ),
             ),
           ),
+          // Weekly performance chart
           Card(
             elevation: 4,
             color: AppColors.blue,
