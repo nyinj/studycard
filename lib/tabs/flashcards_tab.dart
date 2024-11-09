@@ -95,16 +95,7 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
             CustomTitle(title: 'Your Flashcards'),
             SizedBox(height: 20),
             // Display the total flashcards count
-            Text(
-              'Total Flashcards: $_totalFlashcardsCount', // Show total flashcards across all decks
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            // Display the number of decks
-            Text(
-              'Total Decks: $_totalDecksCount',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            
             SizedBox(height: 20),
             Expanded(
               child: ListView.builder(

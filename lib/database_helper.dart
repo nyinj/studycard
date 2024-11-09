@@ -72,20 +72,28 @@ class DatabaseHelper {
   }
 
   // Method to save test results
-  Future<void> storeTestResult(int correctCount, int wrongCount,
-      int totalQuestions, DateTime timestamp) async {
+  Future<void> storeTestResult(
+    int correctCount,
+    int wrongCount,
+    int totalQuestions,
+    DateTime timestamp,
+) async {
+    final score = (correctCount / totalQuestions) * 100; // Calculate the score
     final db = await database;
+    await db.insert(
+        'test_results',
+        {
+          'correct_count': correctCount,
+          'wrong_count': wrongCount,
+          'total_questions': totalQuestions,
+          'score': score,  // Store the score
+          'timestamp': timestamp.toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    print("Test result stored with score: $score");
+}
 
-    // Calculate the percentage score
-    int percentageScore = ((correctCount / totalQuestions) * 100).toInt();
-
-    await db.insert('test_results', {
-      'correct_count': correctCount,
-      'wrong_count': wrongCount,
-      'percentage_score': percentageScore,
-      'timestamp': timestamp.toIso8601String(), // Convert DateTime to string
-    });
-  }
 
   // Method to get the count of flashcards in a deck
   Future<int> getFlashcardsCountByDeck(int deckId) async {

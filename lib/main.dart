@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           } else {
             return snapshot.data == true
-                ? HomeScreen()
+                ? HomeScreen(initialIndex: 0) // Change initial index if needed
                 : const OnboardingScreen();
           }
         },
@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.initialIndex = 0});
 
-  final int initialIndex; // Add a parameter to set the initial tab index.
+  final int initialIndex;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -60,13 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _controller = PersistentTabController(
-        initialIndex: widget.initialIndex); // Use the passed index
+        initialIndex: widget.initialIndex); // Set the initial index
   }
 
   List<Widget> _buildScreens() {
     return [
-      HomeTab(),
-      FlashcardsTab(controller: _controller),
+      FlashcardsTab(controller: _controller),  // Removed HomeTab
       CreateTab(
         onDeckCreated: () {},
         controller: _controller,
@@ -78,12 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<PersistentBottomNavBarItem> _navBarsItems() {
     return [
-      PersistentBottomNavBarItem(
-        icon: const Icon(Icons.home),
-        title: ("Home"),
-        activeColorPrimary: AppColors.red,
-        inactiveColorPrimary: Colors.grey,
-      ),
       PersistentBottomNavBarItem(
         icon: const Icon(Icons.book),
         title: ("Flashcards"),

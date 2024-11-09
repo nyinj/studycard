@@ -148,7 +148,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => HomeScreen(
-                        initialIndex: 3), // Set index to 3 for TestTab
+                        initialIndex: 2), // Set index to 3 for TestTab
                   ),
                 );
 

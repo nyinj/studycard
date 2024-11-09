@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_model.dart';
+import 'package:studycards/utils/colors.dart';
 
 class ProfilePerformance extends StatefulWidget {
   @override
@@ -109,7 +110,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
               int flashcardScore = _flashcardScores[flashcardTitle] ?? 0;
 
               return Card(
-                color: Colors.blueAccent,
+                color: AppColors.blueish,
                 margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
@@ -142,7 +143,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
           // Performance analysis card with flashcards created and tests taken
           Card(
             elevation: 4,
-            color: Colors.red,
+            color: AppColors.red,
             margin: EdgeInsets.symmetric(vertical: 8),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -174,7 +175,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
           // Flashcard scores list
           Card(
             elevation: 4,
-            color: Colors.orange,
+            color: AppColors.orange,
             margin: EdgeInsets.symmetric(vertical: 8),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -200,7 +201,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
           // Weekly performance chart
           Card(
             elevation: 4,
-            color: Colors.blue,
+            color: AppColors.blue,
             margin: EdgeInsets.symmetric(vertical: 8),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

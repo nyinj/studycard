@@ -322,7 +322,7 @@ class _CreateTabState extends State<CreateTab> {
                 Future.delayed(Duration(milliseconds: 100), () {
                   _clearInputs(); // Clear all input fields to start fresh
                 });
-                widget.controller.jumpToTab(1); // Switch to Flashcards tab
+                widget.controller.jumpToTab(0); // Switch to Flashcards tab
               },
               child: Text('Go to Flashcards'),
             ),

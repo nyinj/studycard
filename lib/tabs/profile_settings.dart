@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/onboard/username_screen.dart';
+import 'package:studycards/utils/colors.dart';
 
 class ProfileSettings extends StatelessWidget {
   final Function(String, String) onProfileUpdated;
@@ -34,6 +34,11 @@ class ProfileSettings extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () => _navigateToUsernameScreen(context),
         child: Text('Edit Username and Profile Picture'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.blueish,
+          padding: EdgeInsets.symmetric(vertical: 14),
+          textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
