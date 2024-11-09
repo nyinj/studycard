@@ -4,8 +4,7 @@ import 'package:studycards/flashcard_model.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_widget.dart';
 import 'package:studycards/main.dart';
-import 'package:studycards/tabs/home_tab.dart';
-import 'package:studycards/tabs/test_tab.dart';
+import 'package:studycards/tabs/custom_title.dart';
 import 'package:studycards/utils/colors.dart'; // Assuming AppColors.dart is available
 
 class YourTestScreen extends StatefulWidget {
@@ -163,7 +162,6 @@ class _YourTestScreenState extends State<YourTestScreen> {
   Widget build(BuildContext context) {
     print("Building YourTestScreen...");
     return Scaffold(
-      appBar: _buildAppBar(),
       backgroundColor: Colors.white, // Background color for the screen
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -174,45 +172,6 @@ class _YourTestScreenState extends State<YourTestScreen> {
     );
   }
 
-  AppBar _buildAppBar() {
-    return AppBar(
-      title: Text(
-        'Test Your Recall',
-        style: TextStyle(
-          fontSize: 24, // Custom font size
-          fontWeight: FontWeight.bold, // Custom bold font weight
-          color: AppColors.blueish, // Use the custom color from AppColors
-        ),
-      ),
-      backgroundColor:
-          AppColors.blue, // Using AppColors.blue for the AppBar background
-      elevation: 4,
-      actions: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Center(
-            child: Row(
-              children: [
-                Text(
-                  '${_remainingTime.inHours.toString().padLeft(2, '0')}h ',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${_remainingTime.inMinutes.remainder(60).toString().padLeft(2, '0')}m ',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  '${_remainingTime.inSeconds.remainder(60).toString().padLeft(2, '0')}s',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
   Widget _buildFlashcardContent() {
     print("Building flashcard content for card ${_currentIndex + 1}...");
     return Center(
@@ -220,25 +179,36 @@ class _YourTestScreenState extends State<YourTestScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          CustomTitle(title: 'Your Test'), // Custom title for the screen
+          SizedBox(height: 20),
+          // Centered timer
           Text(
-            'Flashcard ${_currentIndex + 1} of ${_flashcards.length}',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            '${_remainingTime.inHours.toString().padLeft(2, '0')}h '
+            '${_remainingTime.inMinutes.remainder(60).toString().padLeft(2, '0')}m '
+            '${_remainingTime.inSeconds.remainder(60).toString().padLeft(2, '0')}s',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.blue,
+            ),
           ),
           SizedBox(height: 20),
-          // Pass a new key each time to force a rebuild of the FlashcardWidget
+          Text(
+            'Flashcard ${_currentIndex + 1} of ${_flashcards.length}',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 20),
           FlashcardWidget(
-            key: ValueKey(
-                _currentIndex), // This ensures that each card is always reset
+            key: ValueKey(_currentIndex),
             question: _flashcards[_currentIndex].question,
             answer: _flashcards[_currentIndex].answer,
             color: _flashcards[_currentIndex].color,
-            isQuestionSide: true, // Always start with the question side
+            isQuestionSide: true,
           ),
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Wrong answer image with border when selected
               GestureDetector(
                 onTap: _hasSelected ? null : () => _selectAnswer(false),
                 child: Container(
@@ -246,17 +216,25 @@ class _YourTestScreenState extends State<YourTestScreen> {
                     border: _hasSelected && !_selectedIsCorrect
                         ? Border.all(color: AppColors.red, width: 3)
                         : null,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: _hasSelected && !_selectedIsCorrect
+                        ? [
+                            BoxShadow(
+                              color: Colors.red.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 6,
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Image.asset(
                     'assets/wrong.png',
-                    width: 50,
-                    height: 50,
+                    width: 60,
+                    height: 60,
                   ),
                 ),
               ),
-              SizedBox(width: 20),
-              // Correct answer image with border when selected
+              SizedBox(width: 30),
               GestureDetector(
                 onTap: _hasSelected ? null : () => _selectAnswer(true),
                 child: Container(
@@ -264,31 +242,31 @@ class _YourTestScreenState extends State<YourTestScreen> {
                     border: _hasSelected && _selectedIsCorrect
                         ? Border.all(color: AppColors.blueish, width: 3)
                         : null,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: _hasSelected && _selectedIsCorrect
+                        ? [
+                            BoxShadow(
+                              color: Colors.green.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 6,
+                            ),
+                          ]
+                        : [],
                   ),
                   child: Image.asset(
                     'assets/correct.png',
-                    width: 50,
-                    height: 50,
+                    width: 60,
+                    height: 60,
                   ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 20),
-          if (_hasSelected)
-            ElevatedButton(
-              onPressed: _nextCard,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                backgroundColor:
-                    AppColors.blue, // Using AppColors.blue for button color
-              ),
-              child: Text(
-                'Next',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
-            ),
+          ElevatedButton(
+            onPressed: _hasSelected ? _nextCard : null,
+            child: Text('Next'),
+          ),
         ],
       ),
     );

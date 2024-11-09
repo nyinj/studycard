@@ -69,94 +69,115 @@ class _CreateTabState extends State<CreateTab> {
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
-    return Container(
-      color: Colors.white,
-      padding: EdgeInsets.only(top: topPadding + 16.0, left: 16.0, right: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomTitle(title: 'Create'),
-          SizedBox(height: 20),
+    return SingleChildScrollView(
+      // Ensure the whole screen is white by setting the background color here
+      child: Container(
+        color: Colors
+            .white, // Set the background color to white for the entire screen
+        padding:
+            EdgeInsets.only(top: topPadding + 16.0, left: 16.0, right: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CustomTitle(title: 'Create'),
+            SizedBox(height: 20),
 
-          // Title Input
-          TextField(
-            controller: _titleController,
-            decoration: InputDecoration(labelText: 'Title'),
-            onChanged: (value) => setState(() {
-              _title = value;
-            }),
-          ),
-          SizedBox(height: 10),
+            // Title Input
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(labelText: 'Title'),
+              onChanged: (value) => setState(() {
+                _title = value;
+              }),
+            ),
+            SizedBox(height: 10),
 
-          // Description Input
-          TextField(
-            controller: _descriptionController,
-            decoration: InputDecoration(labelText: 'Description'),
-            onChanged: (value) => setState(() {
-              _description = value;
-            }),
-          ),
-          SizedBox(height: 20),
+            // Description Input
+            TextField(
+              controller: _descriptionController,
+              decoration: InputDecoration(labelText: 'Description'),
+              onChanged: (value) => setState(() {
+                _description = value;
+              }),
+            ),
+            SizedBox(height: 20),
 
-          // Color Picker Row
-          Row(
-            children: ColorsOption.allColors.map((color) {
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedColor = color;
-                  });
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 5.0),
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: _selectedColor == color
-                          ? Colors.black
-                          : Colors.transparent,
-                      width: 2,
+            // Color Picker Row
+            Row(
+              children: ColorsOption.allColors.map((color) {
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedColor = color;
+                    });
+                  },
+                  child: Container(
+                    margin: EdgeInsets.symmetric(horizontal: 5.0),
+                    width: 24,
+                    height: 24,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: _selectedColor == color
+                            ? Colors.black
+                            : Colors.transparent,
+                        width: 2,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
-          SizedBox(height: 20),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 20),
 
-          // Card List
-          Expanded(
-            child: ListView.builder(
+            // Card List
+            ListView.builder(
+              shrinkWrap:
+                  true, // Allows ListView to take only the necessary space
+              physics:
+                  NeverScrollableScrollPhysics(), // Disable scrolling for this ListView
               itemCount: _cards.length,
               itemBuilder: (context, index) {
                 return _buildCard(index);
               },
             ),
-          ),
 
-          // Add New Card Button
-          ElevatedButton(
-            onPressed: _addCard,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _selectedColor, // Button background color
-              foregroundColor: Colors.white, // Button text color
-            ),
-            child: Text('Add More Cards'),
-          ),
+            Center(
+              child: Column(
+                mainAxisAlignment:
+                    MainAxisAlignment.center, // Center the buttons vertically
+                crossAxisAlignment: CrossAxisAlignment
+                    .center, // Center the buttons horizontally
+                children: [
+                  // Add New Card Button
+                  ElevatedButton(
+                    onPressed: _addCard,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          _selectedColor, // Button background color
+                      foregroundColor: Colors.white, // Button text color
+                    ),
+                    child: Text('Add More Cards'),
+                  ),
 
-          // Save Flashcards Button
-          ElevatedButton(
-            onPressed: _saveFlashcards,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: _selectedColor, // Button background color
-              foregroundColor: Colors.white, // Button text color
+                  SizedBox(height: 10), // Add some spacing between the buttons
+
+                  // Save Flashcards Button
+                  ElevatedButton(
+                    onPressed: _saveFlashcards,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          _selectedColor, // Button background color
+                      foregroundColor: Colors.white, // Button text color
+                    ),
+                    child: Text('Create'),
+                  ),
+                ],
+              ),
             ),
-            child: Text('Create'),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -305,56 +326,6 @@ class _CreateTabState extends State<CreateTab> {
     print('Flashcards saved successfully.');
 
     widget.onDeckCreated(); // Notify parent that a deck has been created
-    _showSuccessDialog();
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Flashcard Created'),
-          content: Text('Your flashcard deck has been created successfully!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                Future.delayed(Duration(milliseconds: 100), () {
-                  _clearInputs(); // Clear all input fields to start fresh
-                });
-                widget.controller.jumpToTab(0); // Switch to Flashcards tab
-              },
-              child: Text('Go to Flashcards'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                Future.delayed(Duration(milliseconds: 100), () {
-                  _clearInputs(); // Clear all input fields to start fresh
-                });
-              },
-              child: Text('Create Another One'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _clearInputs() {
-    setState(() {
-      _title = ''; // Reset title
-      _description = ''; // Reset description
-      _cards = [
-        {'question': '', 'answer': ''}
-      ]; // Reset to a single empty card
-      _selectedColor = AppColors.red; // Reset color to default
-      _titleController.clear(); // Clear title input
-      _descriptionController.clear(); // Clear description input
-      _questionControllers
-          .forEach((controller) => controller.clear()); // Clear question inputs
-      _answerControllers
-          .forEach((controller) => controller.clear()); // Clear answer inputs
-    });
+    Navigator.pop(context); // Close the screen
   }
 }

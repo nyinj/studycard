@@ -92,93 +92,116 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTitle(title: 'Your Flashcards'),
+            CustomTitle(title: 'StudyCards'),
             SizedBox(height: 20),
+
             // Display the total flashcards count
-
             SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _decks.length,
-                itemBuilder: (context, index) {
-                  final deck = _decks[index];
-                  DateTime createdDate = DateTime.parse(deck['createdAt']);
-                  String formattedDate =
-                      DateFormat('yyyy-MM-dd').format(createdDate);
 
-                  return Card(
-                    margin: EdgeInsets.only(bottom: 16.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 5,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: deck['color'],
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: Colors.black,
-                          width: 1,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            offset: Offset(0, 4),
-                            blurRadius: 6,
-                          ),
-                        ],
-                      ),
-                      child: ListTile(
-                        title: Text(
-                          deck['title'],
+            // Check if there are no decks and display a message
+            _decks.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Vertically center
+                      crossAxisAlignment:
+                          CrossAxisAlignment.center, // Horizontally center
+                      children: [
+                        Text(
+                          'No flashcards created, go to create tab to create a new flashcard',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            color:
+                                Colors.grey, // Light grey color for the message
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
                           ),
+                          textAlign: TextAlign.center, // Center the text
                         ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Show the flashcard count for the individual deck
-                            Text(
-                              'Cards: ${deck['flashcardCount']}',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Created on: $formattedDate',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.white),
-                          onPressed: () {
-                            _deleteDeck(deck['id']);
-                          },
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  YourFlashcardsScreen(deckId: deck['id']),
-                            ),
-                          );
-                        },
-                      ),
+                      ],
                     ),
-                  );
-                },
-              ),
-            ),
+                  )
+                : Expanded(
+                    child: ListView.builder(
+                      itemCount: _decks.length,
+                      itemBuilder: (context, index) {
+                        final deck = _decks[index];
+                        DateTime createdDate =
+                            DateTime.parse(deck['createdAt']);
+                        String formattedDate =
+                            DateFormat('yyyy-MM-dd').format(createdDate);
+
+                        return Card(
+                          margin: EdgeInsets.only(bottom: 16.0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 5,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: deck['color'],
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: Colors.black,
+                                width: 1,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  offset: Offset(0, 4),
+                                  blurRadius: 6,
+                                ),
+                              ],
+                            ),
+                            child: ListTile(
+                              title: Text(
+                                deck['title'],
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Cards: ${deck['flashcardCount']}',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    'Created on: $formattedDate',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.white),
+                                onPressed: () {
+                                  _deleteDeck(deck['id']);
+                                },
+                              ),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => YourFlashcardsScreen(
+                                        deckId: deck['id']),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
           ],
         ),
       ),

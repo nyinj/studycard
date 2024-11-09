@@ -144,75 +144,93 @@ class _TestTabState extends State<TestTab> {
               ),
             ),
 
-            // Flashcards List Section
-            Expanded(
-              child: ListView.builder(
-                itemCount: _decks.length,
-                itemBuilder: (context, index) {
-                  final deck = _decks[index];
-                  DateTime createdDate = DateTime.parse(deck['createdAt']);
-                  String formattedDate =
-                      DateFormat('yyyy-MM-dd').format(createdDate);
+            // Display message if no decks are available
+            if (_decks.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    'No Flashcards to show, create one to get tested!',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
 
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _selectedDeckId = deck['id'];
-                      });
-                    },
-                    child: Card(
-                      margin: EdgeInsets.only(bottom: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 5,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: deck['color'],
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: _selectedDeckId == deck['id']
-                                ? Colors.black
-                                : Colors.black54,
-                            width: _selectedDeckId == deck['id'] ? 3 : 1,
-                          ),
+            // Flashcards List Section (Only show this if decks are available)
+            if (_decks.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _decks.length,
+                  itemBuilder: (context, index) {
+                    final deck = _decks[index];
+                    DateTime createdDate = DateTime.parse(deck['createdAt']);
+                    String formattedDate =
+                        DateFormat('yyyy-MM-dd').format(createdDate);
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _selectedDeckId = deck['id'];
+                        });
+                      },
+                      child: Card(
+                        margin: EdgeInsets.only(bottom: 16.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                        child: ListTile(
-                          title: Text(
-                            deck['title'],
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
+                        elevation: 5,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: deck['color'],
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: _selectedDeckId == deck['id']
+                                  ? Colors.black
+                                  : Colors.black54,
+                              width: _selectedDeckId == deck['id'] ? 3 : 1,
                             ),
                           ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Cards: ${deck['number_of_cards']}',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 16,
-                                ),
+                          child: ListTile(
+                            title: Text(
+                              deck['title'],
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
                               ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Created on: $formattedDate',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Cards: ${deck['number_of_cards']}',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              ),
-                            ],
+                                SizedBox(height: 4),
+                                Text(
+                                  'Created on: $formattedDate',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
 
             // Centered Start Test Button
             if (_selectedDeckId != null)
