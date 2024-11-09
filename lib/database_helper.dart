@@ -54,6 +54,7 @@ class DatabaseHelper {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             correct_count INTEGER,
             wrong_count INTEGER,
+             percentage_score INTEGER,
             timestamp TEXT
           )
         ''');
@@ -74,13 +75,18 @@ class DatabaseHelper {
   }
 
   // Method to save test results
-  Future<void> storeTestResult(
-      int correctCount, int wrongCount, DateTime timestamp) async {
+  Future<void> storeTestResult(int correctCount, int wrongCount,
+      int totalQuestions, DateTime timestamp) async {
     final db = await database;
+
+    // Calculate the percentage score
+    int percentageScore = ((correctCount / totalQuestions) * 100).toInt();
+
     await db.insert('test_results', {
       'correct_count': correctCount,
       'wrong_count': wrongCount,
-      'timestamp': timestamp.toIso8601String(),
+      'percentage_score': percentageScore,
+      'timestamp': timestamp.toIso8601String(), // Convert DateTime to string
     });
   }
 
@@ -203,17 +209,16 @@ class DatabaseHelper {
   }
 
   Future<List<Map<String, dynamic>>> getFlashcardsWithScores() async {
-    final db = await database;
-    // Fetch flashcards from the database
-    final List<Map<String, dynamic>> flashcards = await db.query('flashcards');
+    final db = await _database;
+    var result = await db!.query('flashcards'); // Adjust with actual table name
 
-    return flashcards.map((flashcard) {
-      return {
-        'title': flashcard['title'], // Use the 'title' of the flashcard
-        'score': flashcard['score'] ??
-            0, // Assume score is stored or calculate dynamically
-      };
-    }).toList();
+    // Assuming you have 'title' and 'score' in your flashcard table:
+    return result
+        .map((row) => {
+              'title': row['title'],
+              'score': row['score'],
+            })
+        .toList();
   }
 
   // Method to get the total number of test results

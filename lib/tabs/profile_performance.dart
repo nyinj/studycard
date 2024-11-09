@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
+import 'package:studycards/flashcard_model.dart';
 
 class ProfilePerformance extends StatefulWidget {
   @override
@@ -11,10 +12,8 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
   int _flashcardsCreated = 0;
   int _testsTaken = 0;
   int _totalDecksCount = 0; // Track total number of decks
-  String? _selectedFlashcard; // Track selected flashcard
   List<String> _flashcardNames = []; // List to store flashcard names
   Map<String, int> _flashcardScores = {}; // Store flashcard scores
-  List<String> _flashcardTitles = []; // List of flashcard titles for dropdown
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
@@ -46,17 +45,20 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
 
   // Method to load flashcards and their scores
   Future<void> _loadFlashcards() async {
-    // Fetch flashcards and their scores from the database
+    // Fetch flashcards from the database
     List<Map<String, dynamic>> flashcards =
         await _databaseHelper.getFlashcardsWithScores();
 
+    // Log the fetched data for debugging
+    print("Fetched Flashcards: $flashcards");
+
     setState(() {
+      // Collect the names and scores of flashcards
       _flashcardNames =
-          flashcards.map((flashcard) => flashcard['name'].toString()).toList();
+          flashcards.map((flashcard) => flashcard['title'].toString()).toList();
       _flashcardScores = {
-        for (var flashcard in flashcards) flashcard['name']: flashcard['score']
+        for (var flashcard in flashcards) flashcard['title']: flashcard['score']
       };
-      _flashcardTitles = _flashcardNames; // Populate flashcard titles
     });
   }
 
@@ -89,16 +91,43 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
   Widget _buildFlashcardScores() {
     return Column(
       children: [
-        if (_selectedFlashcard != null)
-          Card(
-            color: Colors.blue,
-            child: Padding(
-              padding: EdgeInsets.all(8),
-              child: Text(
-                'Score: ${_flashcardScores[_selectedFlashcard]}%', // Display selected flashcard score
-                style: TextStyle(fontSize: 16, color: Colors.white),
-              ),
+        if (_flashcardNames.isEmpty)
+          Center(
+            child: Text(
+              'No flashcards available',
+              style: TextStyle(color: Colors.grey, fontSize: 16),
             ),
+          )
+        else
+          // Show flashcards and their scores
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: _flashcardNames.length,
+            itemBuilder: (context, index) {
+              String flashcardTitle = _flashcardNames[index];
+              int flashcardScore = _flashcardScores[flashcardTitle] ?? 0;
+
+              return Card(
+                color: Colors.blueAccent,
+                margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                child: ListTile(
+                  title: Text(
+                    flashcardTitle,
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    'Score: $flashcardScore%',
+                    style: TextStyle(fontSize: 16, color: Colors.white),
+                  ),
+                ),
+              );
+            },
           ),
       ],
     );
@@ -141,7 +170,8 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
               ),
             ),
           ),
-          // Flashcard selection and scores
+
+          // Flashcard scores list
           Card(
             elevation: 4,
             color: Colors.orange,
@@ -154,35 +184,19 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Check scores of particular flashcard',
+                    'Flashcard Scores',
                     style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                         color: Colors.white),
                   ),
                   SizedBox(height: 10),
-                  // Dropdown for selecting flashcard
-                  DropdownButton<String>(
-                    value: _selectedFlashcard,
-                    hint: Text('Select a flashcard'),
-                    onChanged: (newValue) {
-                      setState(() {
-                        _selectedFlashcard = newValue;
-                      });
-                    },
-                    items: _flashcardTitles.map((String flashcardTitle) {
-                      return DropdownMenuItem<String>(
-                        value: flashcardTitle,
-                        child: Text(flashcardTitle),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 10),
-                  _buildFlashcardScores(), // Display flashcard scores
+                  _buildFlashcardScores(), // Display all flashcard scores
                 ],
               ),
             ),
           ),
+
           // Weekly performance chart
           Card(
             elevation: 4,

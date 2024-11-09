@@ -107,14 +107,22 @@ class _YourTestScreenState extends State<YourTestScreen> {
     });
   }
 
+  void _storeTestResults() async {
+    // Store the test results in the database.
+    DateTime timestamp = DateTime.now();
+    await _databaseHelper.storeTestResult(
+      _correctCount,
+      _wrongCount,
+      _flashcards.length, // Total number of questions in the test
+      timestamp,
+    );
+    print("Test results stored.");
+  }
+
   void _showResultsDialog() {
     print(
         "Showing results dialog with $_correctCount correct and $_wrongCount wrong answers.");
-    DateTime timestamp = DateTime.now(); // Get current timestamp
-
-    // Store the test result in the database
-    _databaseHelper.storeTestResult(_correctCount, _wrongCount, timestamp);
-
+    _storeTestResults(); // Save the results
     showDialog(
       context: context,
       builder: (context) {
