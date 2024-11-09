@@ -26,7 +26,7 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [deckId],
     );
-    
+
     if (result.isNotEmpty) {
       return result.first; // Return the first result (deck) found
     } else {
@@ -76,7 +76,8 @@ class DatabaseHelper {
   }
 
   // Insert a new deck
-  Future<int> insertDeck(String title, String description, String color, String createdAt) async {
+  Future<int> insertDeck(
+      String title, String description, String color, String createdAt) async {
     final db = await database;
     return await db.insert('decks', {
       'title': title,
@@ -172,7 +173,7 @@ class DatabaseHelper {
       where: 'id = ?',
       whereArgs: [flashcardId],
     );
-    
+
     if (result.isNotEmpty) {
       return result.first['note'] as String?;
     } else {

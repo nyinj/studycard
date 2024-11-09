@@ -29,7 +29,9 @@ class MyApp extends StatelessWidget {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            return snapshot.data == true ? HomeScreen() : const OnboardingScreen();
+            return snapshot.data == true
+                ? HomeScreen()
+                : const OnboardingScreen();
           }
         },
       ),
@@ -57,7 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = PersistentTabController(initialIndex: widget.initialIndex);  // Use the passed index
+    _controller = PersistentTabController(
+        initialIndex: widget.initialIndex); // Use the passed index
   }
 
   List<Widget> _buildScreens() {

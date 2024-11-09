@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/utils/colors.dart';
-import 'package:studycards/tabs/custom_title.dart'; 
+import 'package:studycards/tabs/custom_title.dart';
+import 'package:studycards/tabs/profile_performance.dart';
+import 'package:studycards/tabs/profile_settings.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -10,67 +12,111 @@ class ProfileTab extends StatefulWidget {
   _ProfileTabState createState() => _ProfileTabState();
 }
 
-class _ProfileTabState extends State<ProfileTab> {
-  String _username = '';
-  String? _profilePicture;
+class _ProfileTabState extends State<ProfileTab>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _username = 'User'; // Default value
+  String? _profilePicture = 'assets/profiles/pfp1.png'; // Default value
 
   @override
   void initState() {
     super.initState();
-    _loadProfileData();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadProfileData(); // Load saved data on initialization
   }
 
   Future<void> _loadProfileData() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _username = prefs.getString('username') ?? 'No Username';
-      _profilePicture = prefs.getString('profile_picture');
+      _username = prefs.getString('username') ?? 'User';
+      _profilePicture =
+          prefs.getString('profile_picture') ?? 'assets/profiles/pfp1.png';
     });
+  }
+
+  void _updateProfileData(String newUsername, String newPfp) async {
+    setState(() {
+      _username = newUsername;
+      _profilePicture = newPfp;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', newUsername);
+    await prefs.setString('profile_picture', newPfp);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the top padding from the safe area
     final topPadding = MediaQuery.of(context).padding.top;
 
-    return Container(
-      color: Colors.white, // Set the background color to white
-      padding: EdgeInsets.only(top: topPadding + 16.0, left: 16.0, right: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center, // Center the main content
-        children: [
-          // Use the CustomTitle widget
-          CustomTitle(
-            title: 'You',
-          ),
-          SizedBox(height: 20), // Space after title section
-          
-          // Greeting message
-          Text(
-            'Hello, $_username!',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 16), // Space between greeting and profile picture
-          
-          // Profile Picture
-          if (_profilePicture != null) ...[
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(_profilePicture!),
+    // Moving print statements outside the widget tree
+    print('Building ProfileTab UI');
+
+    return Scaffold(
+      body: Container(
+        color: Colors.white,
+        padding:
+            EdgeInsets.only(top: topPadding + 16.0, left: 16.0, right: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: EdgeInsets.only(bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CustomTitle(title: 'You'),
+                  SizedBox(height: 20),
+                  Center(
+                    child: Text(
+                      'Hello, $_username!',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  if (_profilePicture != null)
+                    Center(
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundImage: AssetImage(_profilePicture!),
+                      ),
+                    ),
+                  Divider(thickness: 2, color: Colors.grey[400]),
+                ],
+              ),
             ),
-            SizedBox(height: 16),
+            Expanded(
+              child: Column(
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    tabs: [
+                      Tab(text: 'Performance'),
+                      Tab(text: 'Settings'),
+                    ],
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: _tabController,
+                      children: [
+                        ProfilePerformance(),
+                        ProfileSettings(
+                          onProfileUpdated: (newUsername, newPfp) {
+                            _updateProfileData(newUsername, newPfp);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
-          
-          // Divider
-          Divider(thickness: 2, color: Colors.grey[400]), // Customize thickness and color
-          SizedBox(height: 20), // Space after the divider
-          
-          // Additional content can be added below
-          Text(
-            'More content can go here...',
-            style: TextStyle(fontSize: 18),
-          ),
-        ],
+        ),
       ),
     );
   }
