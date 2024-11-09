@@ -23,7 +23,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'flashcards.db');
     return await openDatabase(
       path,
-      version: 4, // Update the version number for schema changes
+      version: 5, // Updated version number for schema changes
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE decks (
@@ -44,6 +44,7 @@ class DatabaseHelper {
             color TEXT,
             deckId INTEGER,
             createdAt TEXT,
+            score INTEGER DEFAULT 0,  // Added score column
             note TEXT,
             FOREIGN KEY (deckId) REFERENCES decks (id)
           )
@@ -54,20 +55,16 @@ class DatabaseHelper {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             correct_count INTEGER,
             wrong_count INTEGER,
-             percentage_score INTEGER,
+            percentage_score INTEGER,
             timestamp TEXT
           )
         ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 4) {
+        if (oldVersion < 5) {
+          // Add score column to flashcards table in case of schema change
           await db.execute('''
-            CREATE TABLE test_results (
-              id INTEGER PRIMARY KEY AUTOINCREMENT,
-              correct_count INTEGER,
-              wrong_count INTEGER,
-              timestamp TEXT
-            )
+            ALTER TABLE flashcards ADD COLUMN score INTEGER DEFAULT 0
           ''');
         }
       },
