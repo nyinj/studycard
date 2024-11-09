@@ -18,49 +18,12 @@ class DatabaseHelper {
     return _database!;
   }
 
-  Future<int> getFlashcardsCountByDeck(int deckId) async {
-  final db = await database;
-  final result = await db.rawQuery('''
-    SELECT COUNT(*) AS flashcards_created
-    FROM flashcards
-    WHERE deckId = ?
-  ''', [deckId]);
-  
-  return Sqflite.firstIntValue(result) ?? 0;
-}
-
-Future<Map<String, int>> getPerformanceData(String timeFrame) async {
-  final db = await database;
-  String dateFilter;
-
-  if (timeFrame == 'Day') {
-    dateFilter = "date('now')";
-  } else if (timeFrame == 'Week') {
-    dateFilter = "date('now', '-7 days')";
-  } else if (timeFrame == 'Month') {
-    dateFilter = "date('now', '-30 days')";
-  } else {
-    throw ArgumentError('Invalid time frame');
-  }
-
-  // Query to get flashcards created within the timeframe
-  final flashcardCountResult = await db.rawQuery('''
-    SELECT COUNT(*) AS flashcards_created
-    FROM flashcards
-    WHERE createdAt >= $dateFilter
-  ''');
-
-  return {
-    'flashcards_created': Sqflite.firstIntValue(flashcardCountResult) ?? 0,
-  };
-}
-
-
+  // Initialize the database
   Future<Database> _initDatabase() async {
     String path = join(await getDatabasesPath(), 'flashcards.db');
     return await openDatabase(
       path,
-      version: 3,
+      version: 4, // Update the version number for schema changes
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE decks (
@@ -85,17 +48,55 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
             FOREIGN KEY (deckId) REFERENCES decks (id)
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE test_results (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            correct_count INTEGER,
+            wrong_count INTEGER,
+            timestamp TEXT
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
-        if (oldVersion < 3) {
-          await db.execute('ALTER TABLE flashcards ADD COLUMN note TEXT');
+        if (oldVersion < 4) {
+          await db.execute('''
+            CREATE TABLE test_results (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              correct_count INTEGER,
+              wrong_count INTEGER,
+              timestamp TEXT
+            )
+          ''');
         }
       },
     );
   }
 
+  // Method to save test results
+  Future<void> storeTestResult(
+      int correctCount, int wrongCount, DateTime timestamp) async {
+    final db = await database;
+    await db.insert('test_results', {
+      'correct_count': correctCount,
+      'wrong_count': wrongCount,
+      'timestamp': timestamp.toIso8601String(),
+    });
+  }
 
-  // Existing methods remain unchanged...
+  // Method to get the count of flashcards in a deck
+  Future<int> getFlashcardsCountByDeck(int deckId) async {
+    final db = await database;
+    final result = await db.query(
+      'flashcards',
+      columns: ['COUNT(*)'],
+      where: 'deckId = ?',
+      whereArgs: [deckId],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // Method to get flashcards by deckId
   Future<List<Flashcard>> getFlashcardsByDeckId(int deckId) async {
     final db = await database;
     final List<Map<String, dynamic>> maps = await db.query(
@@ -109,16 +110,19 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
     });
   }
 
+  // Method to insert a flashcard
   Future<int> insertFlashcard(Flashcard flashcard) async {
     final db = await database;
     return await db.insert('flashcards', flashcard.toMap());
   }
 
+  // Method to get all decks
   Future<List<Map<String, dynamic>>> getDecks() async {
     final db = await database;
     return await db.query('decks');
   }
 
+  // Method to get a deck by ID
   Future<Map<String, dynamic>> getDeckById(int deckId) async {
     final db = await database;
     final result = await db.query(
@@ -133,6 +137,7 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
     }
   }
 
+  // Method to insert a deck
   Future<int> insertDeck(
       String title, String description, String color, String createdAt) async {
     final db = await database;
@@ -144,6 +149,7 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
     });
   }
 
+  // Method to delete a deck
   Future<int> deleteDeck(int id) async {
     final db = await database;
     return await db.delete(
@@ -153,6 +159,7 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
     );
   }
 
+  // Method to delete a flashcard
   Future<int> deleteFlashcard(int id) async {
     final db = await database;
     return await db.delete(
@@ -162,6 +169,7 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
     );
   }
 
+  // Method to update deck card count
   Future<void> updateDeckCardCount(int deckId, int cardCount) async {
     final db = await database;
     await db.update(
@@ -172,6 +180,7 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
     );
   }
 
+  // Method to update flashcard note
   Future<void> updateFlashcardNote(int flashcardId, String note) async {
     final db = await database;
     await db.update(
@@ -180,5 +189,75 @@ Future<Map<String, int>> getPerformanceData(String timeFrame) async {
       where: 'id = ?',
       whereArgs: [flashcardId],
     );
+  }
+
+  // Method to count the distinct flashcards titles
+  Future<int> getDistinctFlashcardsTitlesCount() async {
+    final db = await database;
+    final result = await db.rawQuery('''
+      SELECT COUNT(DISTINCT title) AS flashcards_created 
+      FROM decks
+    ''');
+
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<List<Map<String, dynamic>>> getFlashcardsWithScores() async {
+    final db = await database;
+    // Fetch flashcards from the database
+    final List<Map<String, dynamic>> flashcards = await db.query('flashcards');
+
+    return flashcards.map((flashcard) {
+      return {
+        'title': flashcard['title'], // Use the 'title' of the flashcard
+        'score': flashcard['score'] ??
+            0, // Assume score is stored or calculate dynamically
+      };
+    }).toList();
+  }
+
+  // Method to get the total number of test results
+  Future<int> getTotalTestResultsCount() async {
+    final db = await database;
+    final result = await db.rawQuery('SELECT COUNT(*) FROM test_results');
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  // Method to get performance data
+  Future<Map<String, int>> getPerformanceData(String timeFrame) async {
+    final db = await database;
+    DateTime now = DateTime.now();
+    DateTime startDate;
+
+    // Determine the start date based on the selected time frame
+    if (timeFrame == 'Today') {
+      startDate = DateTime(now.year, now.month, now.day); // Start of today
+    } else if (timeFrame == 'This Week') {
+      int weekday = now.weekday;
+      startDate =
+          now.subtract(Duration(days: weekday - 1)); // Start of the week
+    } else {
+      // 'This Month'
+      startDate = DateTime(now.year, now.month, 1); // Start of the month
+    }
+
+    // Get all test results from the database after the start date
+    List<Map<String, dynamic>> results = await db.query(
+      'test_results',
+      where: 'timestamp >= ?',
+      whereArgs: [startDate.toIso8601String()],
+    );
+
+    // Count the number of tests taken
+    int testsTaken = results.length;
+
+    // Fetch the number of flashcards created (using your existing methods)
+    int flashcardsCreated = await getDistinctFlashcardsTitlesCount();
+
+    // Return the performance data
+    return {
+      'flashcards_created': flashcardsCreated,
+      'tests_taken': testsTaken,
+    };
   }
 }

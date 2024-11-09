@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:studycards/utils/colors.dart';
+import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
 
 class ProfilePerformance extends StatefulWidget {
@@ -9,36 +8,70 @@ class ProfilePerformance extends StatefulWidget {
 }
 
 class _ProfilePerformanceState extends State<ProfilePerformance> {
-  String _selectedTimeFrame = 'Day';
-  String _selectedFlashcard = 'Flashcard 1';
-  List<String> _flashcardOptions = ['Flashcard 1', 'Flashcard 2'];
-  List<int> _flashcardScores = [85, 90, 75];
   int _flashcardsCreated = 0;
   int _testsTaken = 0;
+  int _totalDecksCount = 0; // Track total number of decks
+  String? _selectedFlashcard; // Track selected flashcard
+  List<String> _flashcardNames = []; // List to store flashcard names
+  Map<String, int> _flashcardScores = {}; // Store flashcard scores
+  List<String> _flashcardTitles = []; // List of flashcard titles for dropdown
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
   // Method to fetch performance data from the database
   Future<void> _fetchPerformanceData() async {
-    Map<String, int> performanceData = await _databaseHelper.getPerformanceData(_selectedTimeFrame);
+    Map<String, int> performanceData = await _databaseHelper
+        .getPerformanceData(''); // Fetch data without time frame
+
+    // Get the total test results count
+    int totalTestResults = await _databaseHelper.getTotalTestResultsCount();
+
+    // Log the total test results count
+    print('Total Test Results: $totalTestResults');
+
     setState(() {
       _flashcardsCreated = performanceData['flashcards_created'] ?? 0;
-      _testsTaken = performanceData['tests_taken'] ?? 0;
+      _testsTaken =
+          totalTestResults; // Set the fetched total test results count
     });
   }
 
-  // Update the time frame and fetch the new performance data
-  void _updateTimeFrame(String timeFrame) {
+  // Method to load decks and count the total number of decks
+  Future<void> _loadDecks() async {
+    final decks = await _databaseHelper.getDecks();
     setState(() {
-      _selectedTimeFrame = timeFrame;
+      _totalDecksCount = decks.length; // Count the total number of decks
     });
-    _fetchPerformanceData(); // Fetch new data for the selected time frame
+  }
+
+  // Method to load flashcards and their scores
+  Future<void> _loadFlashcards() async {
+    // Fetch flashcards and their scores from the database
+    List<Map<String, dynamic>> flashcards =
+        await _databaseHelper.getFlashcardsWithScores();
+
+    setState(() {
+      _flashcardNames =
+          flashcards.map((flashcard) => flashcard['name'].toString()).toList();
+      _flashcardScores = {
+        for (var flashcard in flashcards) flashcard['name']: flashcard['score']
+      };
+      _flashcardTitles = _flashcardNames; // Populate flashcard titles
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchPerformanceData(); // Initial fetch when the widget is created
+    _loadDecks(); // Load decks and get the total count
+    _loadFlashcards(); // Load flashcards and their scores
   }
 
   // Method to build statistic cards
   Widget _buildStatisticCard(String label, String value) {
     return Card(
-      color: AppColors.greyish,
+      color: Colors.grey[200],
       child: Padding(
         padding: EdgeInsets.all(8),
         child: Column(
@@ -54,34 +87,21 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
 
   // Method to build flashcard score display
   Widget _buildFlashcardScores() {
-    return SizedBox(
-      height: 50,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: _flashcardScores.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            child: Card(
-              color: AppColors.blueish,
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: Text(
-                  'Score ${index + 1}: ${_flashcardScores[index]}%',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
-                ),
+    return Column(
+      children: [
+        if (_selectedFlashcard != null)
+          Card(
+            color: Colors.blue,
+            child: Padding(
+              padding: EdgeInsets.all(8),
+              child: Text(
+                'Score: ${_flashcardScores[_selectedFlashcard]}%', // Display selected flashcard score
+                style: TextStyle(fontSize: 16, color: Colors.white),
               ),
             ),
-          );
-        },
-      ),
+          ),
+      ],
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchPerformanceData(); // Initial fetch when the widget is created
   }
 
   @override
@@ -90,10 +110,10 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Performance analysis card with time frame buttons
+          // Performance analysis card with flashcards created and tests taken
           Card(
             elevation: 4,
-            color: AppColors.red,
+            color: Colors.red,
             margin: EdgeInsets.symmetric(vertical: 8),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -111,27 +131,10 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
                   SizedBox(height: 10),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: ['Day', 'Week', 'Month'].map((timeFrame) {
-                      return ElevatedButton(
-                        onPressed: () => _updateTimeFrame(timeFrame),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: _selectedTimeFrame == timeFrame
-                              ? Colors.white
-                              : AppColors.blueish,
-                          foregroundColor: Colors.black,
-                        ),
-                        child: Text(timeFrame),
-                      );
-                    }).toList(),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildStatisticCard(
-                          'Flashcards Created', _flashcardsCreated.toString()),
-                      _buildStatisticCard(
-                          'Tests Taken', _testsTaken.toString()),
+                          'Flashcards Created', _totalDecksCount.toString()),
+                      _buildStatisticCard('Tests Taken', _testsTaken.toString())
                     ],
                   ),
                 ],
@@ -141,7 +144,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
           // Flashcard selection and scores
           Card(
             elevation: 4,
-            color: AppColors.orange,
+            color: Colors.orange,
             margin: EdgeInsets.symmetric(vertical: 8),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -158,19 +161,19 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
                         color: Colors.white),
                   ),
                   SizedBox(height: 10),
+                  // Dropdown for selecting flashcard
                   DropdownButton<String>(
                     value: _selectedFlashcard,
-                    onChanged: (String? newValue) {
+                    hint: Text('Select a flashcard'),
+                    onChanged: (newValue) {
                       setState(() {
-                        _selectedFlashcard = newValue!;
+                        _selectedFlashcard = newValue;
                       });
                     },
-                    items: _flashcardOptions
-                        .map<DropdownMenuItem<String>>((String value) {
+                    items: _flashcardTitles.map((String flashcardTitle) {
                       return DropdownMenuItem<String>(
-                        value: value,
-                        child:
-                            Text(value, style: TextStyle(color: Colors.black)),
+                        value: flashcardTitle,
+                        child: Text(flashcardTitle),
                       );
                     }).toList(),
                   ),
@@ -183,7 +186,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
           // Weekly performance chart
           Card(
             elevation: 4,
-            color: AppColors.blue,
+            color: Colors.blue,
             margin: EdgeInsets.symmetric(vertical: 8),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

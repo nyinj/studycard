@@ -44,7 +44,8 @@ class _YourTestScreenState extends State<YourTestScreen> {
 
   Future<void> _loadDeckAndFlashcards() async {
     print("Loading flashcards for deckId: ${widget.deckId}...");
-    final flashcards = await _databaseHelper.getFlashcardsByDeckId(widget.deckId);
+    final flashcards =
+        await _databaseHelper.getFlashcardsByDeckId(widget.deckId);
     setState(() {
       _flashcards = flashcards;
     });
@@ -79,7 +80,8 @@ class _YourTestScreenState extends State<YourTestScreen> {
     setState(() {
       if (!_hasSelected) {
         _hasSelected = true; // Prevent selecting more than once
-        _selectedIsCorrect = isCorrect; // Track if the selected answer is correct
+        _selectedIsCorrect =
+            isCorrect; // Track if the selected answer is correct
         if (isCorrect) {
           _correctCount++; // Increment correct answer count
         } else {
@@ -105,46 +107,52 @@ class _YourTestScreenState extends State<YourTestScreen> {
     });
   }
 
- void _showResultsDialog() {
-  print("Showing results dialog with $_correctCount correct and $_wrongCount wrong answers.");
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text("Test Completed"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("Correct Answers: $_correctCount"),
-            Text("Wrong Answers: $_wrongCount"),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              print("Closing dialog...");
-              Navigator.pop(context); // Close the dialog
-              print("Dialog closed. Now navigating to HomeScreen with TestTab selected...");
+  void _showResultsDialog() {
+    print(
+        "Showing results dialog with $_correctCount correct and $_wrongCount wrong answers.");
+    DateTime timestamp = DateTime.now(); // Get current timestamp
 
-              // This resets the stack and goes to HomeScreen, setting TestTab as active
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => HomeScreen(initialIndex: 3), // Set index to 3 for TestTab
-                ),
-              );
+    // Store the test result in the database
+    _databaseHelper.storeTestResult(_correctCount, _wrongCount, timestamp);
 
-              print("Navigated to HomeScreen with TestTab.");
-            },
-            child: Text("OK"),
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Test Completed"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Correct Answers: $_correctCount"),
+              Text("Wrong Answers: $_wrongCount"),
+            ],
           ),
-        ],
-      );
-    },
-  );
-}
+          actions: [
+            TextButton(
+              onPressed: () {
+                print("Closing dialog...");
+                Navigator.pop(context); // Close the dialog
+                print(
+                    "Dialog closed. Now navigating to HomeScreen with TestTab selected...");
 
+                // This resets the stack and goes to HomeScreen, setting TestTab as active
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => HomeScreen(
+                        initialIndex: 3), // Set index to 3 for TestTab
+                  ),
+                );
 
+                print("Navigated to HomeScreen with TestTab.");
+              },
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -203,11 +211,12 @@ class _YourTestScreenState extends State<YourTestScreen> {
           SizedBox(height: 20),
           // Pass a new key each time to force a rebuild of the FlashcardWidget
           FlashcardWidget(
-            key: ValueKey(_currentIndex),  // This ensures that each card is always reset
+            key: ValueKey(
+                _currentIndex), // This ensures that each card is always reset
             question: _flashcards[_currentIndex].question,
             answer: _flashcards[_currentIndex].answer,
             color: _flashcards[_currentIndex].color,
-            isQuestionSide: true,  // Always start with the question side
+            isQuestionSide: true, // Always start with the question side
           ),
           SizedBox(height: 20),
           Row(

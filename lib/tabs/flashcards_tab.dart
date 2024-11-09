@@ -20,8 +20,9 @@ class FlashcardsTab extends StatefulWidget {
 class _FlashcardsTabState extends State<FlashcardsTab> {
   late final DatabaseHelper _databaseHelper;
   List<Map<String, dynamic>> _decks = [];
-  int? _selectedDeckId;
-  Map<int, int> _flashcardsCount = {};  // Map to store flashcards count per deck
+  int _totalDecksCount = 0; // Track the number of flashcard decks
+  int _totalFlashcardsCount =
+      0; // Track the total number of flashcards across all decks
 
   @override
   void initState() {
@@ -30,24 +31,42 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
     _loadDecks();
   }
 
-  // Load decks
+  // Load decks and count the total number of flashcards across all decks
   Future<void> _loadDecks() async {
     final decks = await _databaseHelper.getDecks();
+    int totalFlashcards = 0;
+
+    // Clear the current list of decks to prevent duplication
+    _decks.clear();
+
+    // Load all decks and count flashcards for each
     for (var deck in decks) {
-      int deckId = deck['id'];
-      int flashcardsCreated = await _databaseHelper.getFlashcardsCountByDeck(deckId);
+      int colorValue = int.tryParse(deck['color']) ?? 0xFF000000;
+      int flashcardCount =
+          await _databaseHelper.getFlashcardsCountByDeck(deck['id']);
+      totalFlashcards +=
+          flashcardCount; // Add the count of flashcards for this deck to the total
+
+      // Update deck with color and flashcard count information
       setState(() {
-        _flashcardsCount[deckId] = flashcardsCreated;
-      });
-    }
-    setState(() {
-      _decks = decks.map((deck) {
-        int colorValue = int.tryParse(deck['color']) ?? 0xFF000000;
-        return {
+        _decks.add({
           ...deck,
           'color': Color(colorValue),
-        };
-      }).toList();
+          'flashcardCount':
+              flashcardCount, // Store the flashcard count in the deck map
+        });
+      });
+    }
+
+    setState(() {
+      _totalDecksCount = decks.length; // Count the total number of decks
+      _totalFlashcardsCount =
+          totalFlashcards; // Store the total flashcard count
+    });
+    setState(() {
+      _totalDecksCount = decks.length; // Count the total number of decks
+      _totalFlashcardsCount =
+          totalFlashcards; // Store the total flashcard count
     });
   }
 
@@ -75,15 +94,26 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
           children: [
             CustomTitle(title: 'Your Flashcards'),
             SizedBox(height: 20),
+            // Display the total flashcards count
+            Text(
+              'Total Flashcards: $_totalFlashcardsCount', // Show total flashcards across all decks
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            // Display the number of decks
+            Text(
+              'Total Decks: $_totalDecksCount',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: _decks.length,
                 itemBuilder: (context, index) {
                   final deck = _decks[index];
                   DateTime createdDate = DateTime.parse(deck['createdAt']);
-                  String formattedDate = DateFormat('yyyy-MM-dd').format(createdDate);
-
-                  int flashcardCount = _flashcardsCount[deck['id']] ?? 0;
+                  String formattedDate =
+                      DateFormat('yyyy-MM-dd').format(createdDate);
 
                   return Card(
                     margin: EdgeInsets.only(bottom: 16.0),
@@ -119,8 +149,9 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Show the flashcard count for the individual deck
                             Text(
-                              'Cards: $flashcardCount',
+                              'Cards: ${deck['flashcardCount']}',
                               style: TextStyle(
                                 color: Colors.white70,
                                 fontSize: 16,
@@ -146,7 +177,8 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => YourFlashcardsScreen(deckId: deck['id']),
+                              builder: (context) =>
+                                  YourFlashcardsScreen(deckId: deck['id']),
                             ),
                           );
                         },
