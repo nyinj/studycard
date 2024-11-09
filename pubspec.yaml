@@ -41,6 +41,7 @@ dependencies:
   permission_handler: ^11.3.1
   numberpicker: ^2.1.2
   fl_chart: ^0.69.0
+  flutter_launcher_icons: ^0.14.1
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -60,6 +61,13 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/app_icon.png"  # Path to your icon
+  min_sdk_android: 21
+  remove_alpha_ios: true
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -82,6 +90,7 @@ flutter:
     - assets/profiles/pfp6.png
     - assets/correct.png
     - assets/wrong.png
+    - assets/app_icon.png
 
 
   # To add assets to your application, add an assets section, like this:
