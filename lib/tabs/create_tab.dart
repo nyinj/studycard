@@ -4,7 +4,6 @@ import 'package:studycards/utils/colors.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_model.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ColorsOption {
   static final List<Color> allColors = [
@@ -36,7 +35,7 @@ class _CreateTabState extends State<CreateTab> {
   String _title = '';
   String _description = '';
   List<Map<String, String>> _cards = [
-    {'question': '', 'answer': ''}
+    {'question': '', 'answer': ''},
   ]; // Initial empty card
 
   // TextEditingControllers for the input fields
@@ -69,115 +68,100 @@ class _CreateTabState extends State<CreateTab> {
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.of(context).padding.top;
-    return SingleChildScrollView(
-      // Ensure the whole screen is white by setting the background color here
-      child: Container(
-        color: Colors
-            .white, // Set the background color to white for the entire screen
-        padding:
-            EdgeInsets.only(top: topPadding + 16.0, left: 16.0, right: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CustomTitle(title: 'Create'),
-            SizedBox(height: 20),
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.only(top: topPadding + 16.0, left: 16.0, right: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CustomTitle(title: 'Create'),
+          SizedBox(height: 20),
 
-            // Title Input
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(labelText: 'Title'),
-              onChanged: (value) => setState(() {
-                _title = value;
-              }),
-            ),
-            SizedBox(height: 10),
+          // Title Input
+          TextField(
+            controller: _titleController,
+            decoration: InputDecoration(labelText: 'Title'),
+            onChanged: (value) => setState(() {
+              _title = value;
+            }),
+          ),
+          SizedBox(height: 10),
 
-            // Description Input
-            TextField(
-              controller: _descriptionController,
-              decoration: InputDecoration(labelText: 'Description'),
-              onChanged: (value) => setState(() {
-                _description = value;
-              }),
-            ),
-            SizedBox(height: 20),
+          // Description Input
+          TextField(
+            controller: _descriptionController,
+            decoration: InputDecoration(labelText: 'Description'),
+            onChanged: (value) => setState(() {
+              _description = value;
+            }),
+          ),
+          SizedBox(height: 20),
 
-            // Color Picker Row
-            Row(
-              children: ColorsOption.allColors.map((color) {
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedColor = color;
-                    });
-                  },
-                  child: Container(
-                    margin: EdgeInsets.symmetric(horizontal: 5.0),
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color: color,
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: _selectedColor == color
-                            ? Colors.black
-                            : Colors.transparent,
-                        width: 2,
-                      ),
+          // Color Picker Row
+          Row(
+            children: ColorsOption.allColors.map((color) {
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedColor = color;
+                  });
+                },
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 5.0),
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _selectedColor == color
+                          ? Colors.black
+                          : Colors.transparent,
+                      width: 2,
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-            SizedBox(height: 20),
+                ),
+              );
+            }).toList(),
+          ),
+          SizedBox(height: 20),
 
-            // Card List
-            ListView.builder(
-              shrinkWrap:
-                  true, // Allows ListView to take only the necessary space
-              physics:
-                  NeverScrollableScrollPhysics(), // Disable scrolling for this ListView
-              itemCount: _cards.length,
+          // Card List
+          Expanded(
+            child: ListView.builder(
+              itemCount:
+                  _cards.length + 1, // Add 1 for the "Add More Cards" button
               itemBuilder: (context, index) {
-                return _buildCard(index);
+                if (index == _cards.length) {
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ElevatedButton(
+                      onPressed: _addCard,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            _selectedColor, // Button background color
+                        foregroundColor: Colors.white, // Button text color
+                      ),
+                      child: Text('Add More Cards'),
+                    ),
+                  );
+                } else {
+                  return _buildCard(index);
+                }
               },
             ),
+          ),
 
-            Center(
-              child: Column(
-                mainAxisAlignment:
-                    MainAxisAlignment.center, // Center the buttons vertically
-                crossAxisAlignment: CrossAxisAlignment
-                    .center, // Center the buttons horizontally
-                children: [
-                  // Add New Card Button
-                  ElevatedButton(
-                    onPressed: _addCard,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          _selectedColor, // Button background color
-                      foregroundColor: Colors.white, // Button text color
-                    ),
-                    child: Text('Add More Cards'),
-                  ),
-
-                  SizedBox(height: 10), // Add some spacing between the buttons
-
-                  // Save Flashcards Button
-                  ElevatedButton(
-                    onPressed: _saveFlashcards,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          _selectedColor, // Button background color
-                      foregroundColor: Colors.white, // Button text color
-                    ),
-                    child: Text('Create'),
-                  ),
-                ],
-              ),
+          // Save Flashcards Button
+          ElevatedButton(
+            onPressed: _saveFlashcards,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _selectedColor, // Button background color
+              foregroundColor: Colors.white, // Button text color
             ),
-          ],
-        ),
+            child: Text('Create'),
+          ),
+        ],
       ),
     );
   }
@@ -202,24 +186,20 @@ class _CreateTabState extends State<CreateTab> {
                 controller: _questionControllers[index],
                 decoration: InputDecoration(
                   labelText: 'Question',
-                  labelStyle:
-                      TextStyle(color: Colors.white), // Label text color
-                  hintStyle:
-                      TextStyle(color: Colors.white70), // Placeholder color
+                  labelStyle: TextStyle(color: Colors.white),
+                  hintStyle: TextStyle(color: Colors.white70),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0), // Rounded border
-                    borderSide: BorderSide(color: Colors.white), // Border color
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 2.0), // Focused border color
+                    borderSide: BorderSide(color: Colors.white, width: 2.0),
                   ),
                 ),
-                style: TextStyle(color: Colors.white), // Input text color
+                style: TextStyle(color: Colors.white),
                 onChanged: (value) => setState(() {
-                  _cards[index]['question'] = value; // Update question in card
+                  _cards[index]['question'] = value;
                 }),
               ),
             ),
@@ -229,29 +209,25 @@ class _CreateTabState extends State<CreateTab> {
                 controller: _answerControllers[index],
                 decoration: InputDecoration(
                   labelText: 'Answer',
-                  labelStyle:
-                      TextStyle(color: Colors.white), // Label text color
-                  hintStyle:
-                      TextStyle(color: Colors.white70), // Placeholder color
+                  labelStyle: TextStyle(color: Colors.white),
+                  hintStyle: TextStyle(color: Colors.white70),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0), // Rounded border
-                    borderSide: BorderSide(color: Colors.white), // Border color
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(color: Colors.white),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 2.0), // Focused border color
+                    borderSide: BorderSide(color: Colors.white, width: 2.0),
                   ),
                 ),
-                style: TextStyle(color: Colors.white), // Input text color
+                style: TextStyle(color: Colors.white),
                 onChanged: (value) => setState(() {
-                  _cards[index]['answer'] = value; // Update answer in card
+                  _cards[index]['answer'] = value;
                 }),
               ),
             ),
             IconButton(
-              icon: Icon(Icons.delete, color: Colors.white), // Icon color
+              icon: Icon(Icons.delete, color: Colors.white),
               onPressed: () => _removeCard(index),
             ),
           ],
@@ -262,29 +238,23 @@ class _CreateTabState extends State<CreateTab> {
 
   void _addCard() {
     setState(() {
-      _cards.add({'question': '', 'answer': ''}); // Add a new empty card
-      _questionControllers.add(
-          TextEditingController()); // Add a new controller for the question
-      _answerControllers
-          .add(TextEditingController()); // Add a new controller for the answer
+      _cards.add({'question': '', 'answer': ''});
+      _questionControllers.add(TextEditingController());
+      _answerControllers.add(TextEditingController());
     });
   }
 
   void _removeCard(int index) {
     setState(() {
-      _cards.removeAt(index); // Remove the card at the specified index
-      _questionControllers[index].dispose(); // Dispose of the controller
-      _answerControllers[index].dispose(); // Dispose of the controller
-      _questionControllers.removeAt(index); // Remove controller from the list
-      _answerControllers.removeAt(index); // Remove controller from the list
+      _cards.removeAt(index);
+      _questionControllers[index].dispose();
+      _answerControllers[index].dispose();
+      _questionControllers.removeAt(index);
+      _answerControllers.removeAt(index);
     });
   }
 
   Future<void> _saveFlashcards() async {
-    print('Title: $_title');
-    print('Description: $_description');
-
-    // Check if title and description are empty
     if (_title.isEmpty || _description.isEmpty) {
       final snackBar = SnackBar(
         content: Text('Please fill in both title and description.'),
@@ -294,17 +264,14 @@ class _CreateTabState extends State<CreateTab> {
       return; // Exit the method if validation fails
     }
 
-    print('Saving flashcards...');
-
-    // Insert deck and get deckId
     int deckId = await _databaseHelper.insertDeck(
       _title,
       _description,
       _selectedColor.value.toString(),
-      DateTime.now().toString(), // Save creation date
+      DateTime.now().toString(),
     );
 
-    int cardCount = 0; // Count of cards added
+    int cardCount = 0;
     for (var card in _cards) {
       if (card['question']!.isNotEmpty && card['answer']!.isNotEmpty) {
         await _databaseHelper.insertFlashcard(
@@ -316,16 +283,45 @@ class _CreateTabState extends State<CreateTab> {
             createdAt: DateTime.now(),
           ),
         );
-        cardCount++; // Increment card count
+        cardCount++;
       }
     }
 
-    // Update the deck with the number of cards created
     await _databaseHelper.updateDeckCardCount(deckId, cardCount);
 
-    print('Flashcards saved successfully.');
+    widget.onDeckCreated();
+    _showSuccessDialog();
+  }
 
-    widget.onDeckCreated(); // Notify parent that a deck has been created
-    Navigator.pop(context); // Close the screen
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Flashcard Created'),
+          content:
+              Text('Your new flashcards deck has been successfully created!'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _clearInputs();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _clearInputs() {
+    _titleController.clear();
+    _descriptionController.clear();
+    _questionControllers.clear();
+    _answerControllers.clear();
+    _cards.clear();
+    _cards.add({'question': '', 'answer': ''});
+    setState(() {});
   }
 }

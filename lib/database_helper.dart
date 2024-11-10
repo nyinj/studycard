@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'flashcard_model.dart';
+import 'dart:async';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper._internal();
@@ -16,6 +17,15 @@ class DatabaseHelper {
     if (_database != null) return _database!;
     _database = await _initDatabase();
     return _database!;
+  }
+
+  Future<List<Flashcard>> getAllFlashcards() async {
+    final db = await database;
+    var res = await db.query('flashcards');
+    List<Flashcard> flashcards = res.isNotEmpty
+        ? res.map((flashcard) => Flashcard.fromMap(flashcard)).toList()
+        : [];
+    return flashcards;
   }
 
   // Initialize the database
