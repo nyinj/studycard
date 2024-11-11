@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_model.dart';
 import 'package:studycards/onboard/username_screen.dart';
+import 'package:studycards/utils/colors.dart';
 
 class ProfileSettings extends StatelessWidget {
   final Function(String, String) onProfileUpdated;
@@ -108,7 +109,7 @@ class ProfileSettings extends StatelessWidget {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.red,
+              color: AppColors.red,
             ),
             textAlign: TextAlign.center,
           ),
@@ -121,7 +122,7 @@ class ProfileSettings extends StatelessWidget {
               style: TextStyle(fontSize: 16),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: AppColors.blue,
               padding: EdgeInsets.symmetric(vertical: 14),
               foregroundColor: Colors.white,
             ),
@@ -135,7 +136,7 @@ class ProfileSettings extends StatelessWidget {
               style: TextStyle(fontSize: 16),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
+              backgroundColor: AppColors.blue,
               padding: EdgeInsets.symmetric(vertical: 14),
               foregroundColor: Colors.white,
             ),

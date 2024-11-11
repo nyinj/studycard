@@ -106,9 +106,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: PersistentTabView(
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: SafeArea(
+      child: PersistentTabView(
         context,
         controller: _controller,
         screens: _buildScreens(),
@@ -118,6 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
         handleAndroidBackButtonPress: true,
         resizeToAvoidBottomInset: true,
       ),
-    );
-  }
+    ),
+  );
+}
+
 }
