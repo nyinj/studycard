@@ -41,8 +41,8 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
       final flashcards = await _databaseHelper.getFlashcardsByDeckId(widget.deckId);
 
       setState(() {
-        _deckTitle = deck['title'];
-        _deckDescription = deck['description'];
+        _deckTitle = deck?['title'];
+        _deckDescription = deck?['description'];
         _flashcards = flashcards;
 
         // Initialize the note controllers for each flashcard

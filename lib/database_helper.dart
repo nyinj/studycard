@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'flashcard_model.dart';
@@ -131,44 +133,87 @@ class DatabaseHelper {
 
   // Method to get flashcards by deckId
   Future<List<Flashcard>> getFlashcardsByDeckId(int deckId) async {
-    final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query(
-      'flashcards',
-      where: 'deckId = ?',
-      whereArgs: [deckId],
-    );
+  final db = await database;
+  final List<Map<String, dynamic>> maps = await db.query(
+    'flashcards',
+    where: 'deckId = ?',
+    whereArgs: [deckId],
+  );
 
+  if (maps.isNotEmpty) {
     return List.generate(maps.length, (i) {
       return Flashcard.fromMap(maps[i]);
     });
+  } else {
+    print('No flashcards found for deck ID: $deckId');
+    return [];  // Return an empty list if no flashcards
   }
+}
+Future<String?> exportDeckToJson(int deckId) async {
+  try {
+    // Get the deck and its flashcards
+    final deck = await getDeckById(deckId);
+    if (deck == null) {
+      return 'Deck not found';  // Early exit if deck is not found
+    }
+    
+    final flashcards = await getFlashcardsByDeckId(deckId);
+    
+    // Prepare deck data for export
+    Map<String, dynamic> exportData = {
+      'deck': deck,
+      'flashcards': flashcards.map((fc) => fc.toMap()).toList(),
+    };
+    
+    // Convert to JSON string
+    return jsonEncode(exportData);
+  } catch (e) {
+    print("Error exporting deck: $e");
+    return 'Error exporting deck';
+  }
+}
 
   // Method to insert a flashcard
   Future<int> insertFlashcard(Flashcard flashcard) async {
-    final db = await database;
-    return await db.insert('flashcards', flashcard.toMap());
+  final db = await database;
+  try {
+    // Insert flashcard into the database
+    return await db.insert(
+      'flashcards', 
+      flashcard.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,  // Handle conflicts by replacing
+    );
+  } catch (e) {
+    print("Error saving flashcard: $e");
+    rethrow; // Optionally, you can handle this differently, such as returning a specific value
   }
+}
+
 
   // Method to get all decks
   Future<List<Map<String, dynamic>>> getDecks() async {
-    final db = await database;
-    return await db.query('decks');
-  }
+  final db = await database;
+  return await db.query('decks');
+}
+
 
   // Method to get a deck by ID
-  Future<Map<String, dynamic>> getDeckById(int deckId) async {
-    final db = await database;
-    final result = await db.query(
-      'decks',
-      where: 'id = ?',
-      whereArgs: [deckId],
-    );
-    if (result.isNotEmpty) {
-      return result.first;
-    } else {
-      throw Exception('Deck not found');
-    }
+  Future<Map<String, dynamic>?> getDeckById(int deckId) async {
+  final db = await database;
+  final result = await db.query(
+    'decks',
+    where: 'id = ?',
+    whereArgs: [deckId],
+  );
+
+  if (result.isNotEmpty) {
+    return result.first;
+  } else {
+    print('Deck not found for ID: $deckId');
+    return null;  // Return null if deck not found
   }
+}
+
 
   // Method to insert a deck
   Future<int> insertDeck(
@@ -271,34 +316,33 @@ class DatabaseHelper {
 
   // Method to get performance data
   Future<Map<String, int>> getPerformanceData(String timeFrame) async {
-    final db = await database;
-    DateTime now = DateTime.now();
-    DateTime startDate;
+  final db = await database;
+  DateTime now = DateTime.now();
+  DateTime startDate;
 
-    // Determine the start date based on the selected time frame
-    if (timeFrame == 'Today') {
-      startDate = DateTime(now.year, now.month, now.day);
-    } else if (timeFrame == 'This Week') {
-      int weekday = now.weekday;
-      startDate = now.subtract(Duration(days: weekday - 1));
-    } else {
-      startDate = DateTime(now.year, now.month, 1);
-    }
-
-    List<Map<String, dynamic>> results = await db.query(
-      'test_results',
-      where: 'timestamp >= ?',
-      whereArgs: [startDate.toIso8601String()],
-    );
-
-    print("Retrieved ${results.length} test results");
-
-    int testsTaken = results.length;
-    int flashcardsCreated = await getDistinctFlashcardsTitlesCount();
-
-    return {
-      'flashcards_created': flashcardsCreated,
-      'tests_taken': testsTaken,
-    };
+  // Determine the start date based on the selected time frame
+  if (timeFrame == 'Today') {
+    startDate = DateTime(now.year, now.month, now.day);
+  } else if (timeFrame == 'This Week') {
+    int weekday = now.weekday;
+    startDate = now.subtract(Duration(days: weekday - 1));
+  } else {
+    startDate = DateTime(now.year, now.month, 1); // For 'This Month'
   }
+
+  List<Map<String, dynamic>> results = await db.query(
+    'test_results',
+    where: 'timestamp >= ?',
+    whereArgs: [startDate.toIso8601String()],
+  );
+
+  int testsTaken = results.length;
+  int flashcardsCreated = await getDistinctFlashcardsTitlesCount();
+
+  return {
+    'flashcards_created': flashcardsCreated,
+    'tests_taken': testsTaken,
+  };
+}
+
 }

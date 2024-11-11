@@ -264,9 +264,21 @@ class _YourTestScreenState extends State<YourTestScreen> {
           ),
           SizedBox(height: 20),
           ElevatedButton(
-            onPressed: _hasSelected ? _nextCard : null,
-            child: Text('Next'),
-          ),
+  onPressed: _hasSelected ? _nextCard : null,
+  style: ElevatedButton.styleFrom(
+    backgroundColor: _hasSelected ? AppColors.blue : AppColors.greyish, // Background color
+    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12), // Button padding
+  ),
+  child: Text(
+    'Next',
+    style: TextStyle(
+      color: Colors.white, // Text color
+      fontWeight: FontWeight.bold, // Optional: bold text
+      fontSize: 16, // Optional: font size
+    ),
+  ),
+),
+
         ],
       ),
     );

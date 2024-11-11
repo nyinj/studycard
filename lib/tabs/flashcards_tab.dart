@@ -63,11 +63,6 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
       _totalFlashcardsCount =
           totalFlashcards; // Store the total flashcard count
     });
-    setState(() {
-      _totalDecksCount = decks.length; // Count the total number of decks
-      _totalFlashcardsCount =
-          totalFlashcards; // Store the total flashcard count
-    });
   }
 
   // Refresh deck list
@@ -78,6 +73,11 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
   // Delete deck
   Future<void> _deleteDeck(int id) async {
     await _databaseHelper.deleteDeck(id);
+    _loadDecks();
+  }
+
+  // Callback function to reload decks after a new deck is created
+  void _onDeckCreated() {
     _loadDecks();
   }
 
