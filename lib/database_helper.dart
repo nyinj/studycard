@@ -217,6 +217,23 @@ Future<String?> exportDeckToJson(int deckId) async {
   }
 }
 
+// Method to clear all data from the database
+Future<void> clearDatabase() async {
+  final db = await database;
+
+  try {
+    // Clear all data from each table
+    await db.delete('flashcards');
+    await db.delete('decks');
+    await db.delete('test_results');
+
+    print("All tables cleared successfully");
+  } catch (e) {
+    print("Error clearing database: $e");
+  }
+}
+
+
 
   // Method to insert a deck
   Future<int> insertDeck(
