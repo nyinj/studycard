@@ -135,105 +135,103 @@ class DatabaseHelper {
 
   // Method to get flashcards by deckId
   Future<List<Flashcard>> getFlashcardsByDeckId(int deckId) async {
-  final db = await database;
-  final List<Map<String, dynamic>> maps = await db.query(
-    'flashcards',
-    where: 'deckId = ?',
-    whereArgs: [deckId],
-  );
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'flashcards',
+      where: 'deckId = ?',
+      whereArgs: [deckId],
+    );
 
-  if (maps.isNotEmpty) {
-    return List.generate(maps.length, (i) {
-      return Flashcard.fromMap(maps[i]);
-    });
-  } else {
-    print('No flashcards found for deck ID: $deckId');
-    return [];  // Return an empty list if no flashcards
-  }
-}
-Future<String?> exportDeckToJson(int deckId) async {
-  try {
-    // Get the deck and its flashcards
-    final deck = await getDeckById(deckId);
-    if (deck == null) {
-      return 'Deck not found';  // Early exit if deck is not found
+    if (maps.isNotEmpty) {
+      return List.generate(maps.length, (i) {
+        return Flashcard.fromMap(maps[i]);
+      });
+    } else {
+      print('No flashcards found for deck ID: $deckId');
+      return []; // Return an empty list if no flashcards
     }
-    
-    final flashcards = await getFlashcardsByDeckId(deckId);
-    
-    // Prepare deck data for export
-    Map<String, dynamic> exportData = {
-      'deck': deck,
-      'flashcards': flashcards.map((fc) => fc.toMap()).toList(),
-    };
-    
-    // Convert to JSON string
-    return jsonEncode(exportData);
-  } catch (e) {
-    print("Error exporting deck: $e");
-    return 'Error exporting deck';
   }
-}
+
+  Future<String?> exportDeckToJson(int deckId) async {
+    try {
+      // Get the deck and its flashcards
+      final deck = await getDeckById(deckId);
+      if (deck == null) {
+        return 'Deck not found'; // Early exit if deck is not found
+      }
+
+      final flashcards = await getFlashcardsByDeckId(deckId);
+
+      // Prepare deck data for export
+      Map<String, dynamic> exportData = {
+        'deck': deck,
+        'flashcards': flashcards.map((fc) => fc.toMap()).toList(),
+      };
+
+      // Convert to JSON string
+      return jsonEncode(exportData);
+    } catch (e) {
+      print("Error exporting deck: $e");
+      return 'Error exporting deck';
+    }
+  }
 
   // Method to insert a flashcard
   Future<int> insertFlashcard(Flashcard flashcard) async {
-  final db = await database;
-  try {
-    // Insert flashcard into the database
-    return await db.insert(
-      'flashcards', 
-      flashcard.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,  // Handle conflicts by replacing
-    );
-  } catch (e) {
-    print("Error saving flashcard: $e");
-    rethrow; // Optionally, you can handle this differently, such as returning a specific value
+    final db = await database;
+    try {
+      // Insert flashcard into the database
+      return await db.insert(
+        'flashcards',
+        flashcard.toMap(),
+        conflictAlgorithm:
+            ConflictAlgorithm.replace, // Handle conflicts by replacing
+      );
+    } catch (e) {
+      print("Error saving flashcard: $e");
+      rethrow; // Optionally, you can handle this differently, such as returning a specific value
+    }
   }
-}
-
 
   // Method to get all decks
   Future<List<Map<String, dynamic>>> getDecks() async {
-  final db = await database;
-  return await db.query('decks');
-}
-
+    final db = await database;
+    return await db.query('decks');
+  }
 
   // Method to get a deck by ID
   Future<Map<String, dynamic>?> getDeckById(int deckId) async {
-  final db = await database;
-  final result = await db.query(
-    'decks',
-    where: 'id = ?',
-    whereArgs: [deckId],
-  );
+    final db = await database;
+    final result = await db.query(
+      'decks',
+      where: 'id = ?',
+      whereArgs: [deckId],
+    );
 
-  if (result.isNotEmpty) {
-    return result.first;
-  } else {
-    // ignore: avoid_print
-    print('Deck not found for ID: $deckId');
-    return null;  // Return null if deck not found
+    if (result.isNotEmpty) {
+      return result.first;
+    } else {
+      // ignore: avoid_print
+      print('Deck not found for ID: $deckId');
+      return null; // Return null if deck not found
+    }
   }
-}
 
 // Method to clear all data from the database
-Future<void> clearDatabase() async {
-  final db = await database;
+  Future<void> clearDatabase() async {
+    final db = await database;
 
-  try {
-    // Clear all data from each table
-    await db.delete('flashcards');
-    await db.delete('decks');
-    await db.delete('test_results');
+    try {
+      // Clear all data from each table
+      await db.delete('flashcards');
+      await db.delete('decks');
+      await db.delete('test_results');
 
-    print("All tables cleared successfully");
-  } catch (e) {
-    print("Error clearing database: $e");
+      print("All tables cleared successfully");
+    } catch (e) {
+      print("Error clearing database: $e");
+    }
   }
-}
-
-
 
   // Method to insert a deck
   Future<int> insertDeck(
@@ -303,17 +301,6 @@ Future<void> clearDatabase() async {
     );
   }
 
-  // Method to count the distinct flashcards titles
-  Future<int> getDistinctFlashcardsTitlesCount() async {
-    final db = await database;
-    final result = await db.rawQuery('''
-      SELECT COUNT(DISTINCT title) AS flashcards_created 
-      FROM decks
-    ''');
-
-    return Sqflite.firstIntValue(result) ?? 0;
-  }
-
   Future<List<Map<String, dynamic>>> getFlashcardsWithScores() async {
     final db = _database;
     var result = await db!.query('flashcards'); // Adjust with actual table name
@@ -334,35 +321,42 @@ Future<void> clearDatabase() async {
     return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  // Method to get performance data
-  Future<Map<String, int>> getPerformanceData(String timeFrame) async {
-  final db = await database;
-  DateTime now = DateTime.now();
-  DateTime startDate;
-
-  // Determine the start date based on the selected time frame
-  if (timeFrame == 'Today') {
-    startDate = DateTime(now.year, now.month, now.day);
-  } else if (timeFrame == 'This Week') {
-    int weekday = now.weekday;
-    startDate = now.subtract(Duration(days: weekday - 1));
-  } else {
-    startDate = DateTime(now.year, now.month, 1); // For 'This Month'
+  // Method to get the count of individual flashcards
+  Future<int> getIndividualFlashcardsCount() async {
+    final db = await database;
+    final result = await db
+        .rawQuery('SELECT COUNT(*) AS total_flashcards FROM flashcards');
+    return Sqflite.firstIntValue(result) ?? 0;
   }
 
-  List<Map<String, dynamic>> results = await db.query(
-    'test_results',
-    where: 'timestamp >= ?',
-    whereArgs: [startDate.toIso8601String()],
-  );
+// Updated getPerformanceData to count individual flashcards
+  Future<Map<String, int>> getPerformanceData(String timeFrame) async {
+    final db = await database;
+    DateTime now = DateTime.now();
+    DateTime startDate;
 
-  int testsTaken = results.length;
-  int flashcardsCreated = await getDistinctFlashcardsTitlesCount();
+    // Determine the start date based on the selected time frame
+    if (timeFrame == 'Today') {
+      startDate = DateTime(now.year, now.month, now.day);
+    } else if (timeFrame == 'This Week') {
+      int weekday = now.weekday;
+      startDate = now.subtract(Duration(days: weekday - 1));
+    } else {
+      startDate = DateTime(now.year, now.month, 1); // For 'This Month'
+    }
 
-  return {
-    'flashcards_created': flashcardsCreated,
-    'tests_taken': testsTaken,
-  };
-}
+    List<Map<String, dynamic>> results = await db.query(
+      'test_results',
+      where: 'timestamp >= ?',
+      whereArgs: [startDate.toIso8601String()],
+    );
 
+    int testsTaken = results.length;
+    int flashcardsCreated = await getIndividualFlashcardsCount();
+
+    return {
+      'flashcards_created': flashcardsCreated,
+      'tests_taken': testsTaken,
+    };
+  }
 }
