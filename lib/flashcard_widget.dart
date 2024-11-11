@@ -42,7 +42,7 @@ class FlashcardWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Label for the question
-                Text(
+                const Text(
                   "Question",
                   style: TextStyle(
                     fontSize: 18.0,
@@ -51,12 +51,12 @@ class FlashcardWidget extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 // The actual question
                 Text(
                   question,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 24.0, // Adjust font size as needed
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
@@ -83,7 +83,7 @@ class FlashcardWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Label for the answer
-                Text(
+                const Text(
                   "Answer",
                   style: TextStyle(
                     fontSize: 18.0,
@@ -92,7 +92,7 @@ class FlashcardWidget extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
 
                 // The actual answer with black text when it's the answer side
                 Text(

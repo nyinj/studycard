@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/tabs/custom_title.dart'; // Adjust the import path
@@ -61,17 +63,17 @@ class _HomeTabState extends State<HomeTab> {
         crossAxisAlignment:
             CrossAxisAlignment.start, // Align content to the start
         children: [
-          CustomTitle(title: 'Home'), // Use the CustomTitle widget here
-          SizedBox(height: 20), // Space after the title
+          const CustomTitle(title: 'Home'), // Use the CustomTitle widget here
+          const SizedBox(height: 20), // Space after the title
 
           // Display the current streak
           Row(
             children: [
-              Icon(Icons.local_fire_department, color: Colors.orange),
-              SizedBox(width: 8),
+              const Icon(Icons.local_fire_department, color: Colors.orange),
+              const SizedBox(width: 8),
               Text(
                 'Current Streak: $_streakCount days',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ],
           ),

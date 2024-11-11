@@ -6,9 +6,9 @@ class CustomTitle extends StatelessWidget {
   final String title;
 
   const CustomTitle({
-    Key? key,
+    super.key,
     required this.title,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,15 +22,15 @@ class CustomTitle extends StatelessWidget {
             'assets/title_logo.png', // Path to the logo image
             height: 40, // Adjust height as needed
           ),
-          SizedBox(width: 8), // Space between logo and title
+          const SizedBox(width: 8), // Space between logo and title
           Column(
             crossAxisAlignment: CrossAxisAlignment.start, // Align title and underline to the left
             children: [
               Text(
                 title,
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 8), // Space between title and underline
+              const SizedBox(height: 8), // Space between title and underline
               Container(
                 height: 4, // Thickness of the underline
                 width: 80, // Width of the underline
@@ -40,7 +40,7 @@ class CustomTitle extends StatelessWidget {
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.2), // Shadow color
-                      offset: Offset(2, 2), // Shadow offset
+                      offset: const Offset(2, 2), // Shadow offset
                       blurRadius: 4, // Shadow blur radius
                     ),
                   ],

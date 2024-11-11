@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 
 class TestScreen extends StatelessWidget {
@@ -20,20 +22,20 @@ class TestScreen extends StatelessWidget {
           children: [
             Text(
               'Test Started for Flashcard ID: $flashcardId',
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               'Time Remaining: ${timerDuration.inHours}:${timerDuration.inMinutes % 60}:${timerDuration.inSeconds % 60}',
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             ElevatedButton(
               onPressed: () {
                 // Handle test logic here (e.g., show question, timer countdown, etc.)
                 print('Test started for flashcard $flashcardId with timer $timerDuration');
               },
-              child: Text('Start Test'),
+              child: const Text('Start Test'),
             ),
           ],
         ),

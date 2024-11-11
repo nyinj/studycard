@@ -1,8 +1,9 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:studycards/onboard/onboarding_screen.dart';
 import 'package:studycards/utils/colors.dart';
-import 'tabs/home_tab.dart';
 import 'tabs/flashcards_tab.dart';
 import 'tabs/create_tab.dart';
 import 'tabs/test_tab.dart';
@@ -10,7 +11,7 @@ import 'tabs/profile_tab.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           } else {
             return snapshot.data == true
-                ? HomeScreen(initialIndex: 0) // Change initial index if needed
+                ? const HomeScreen(initialIndex: 0) // Change initial index if needed
                 : const OnboardingScreen();
           }
         },
@@ -65,13 +66,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<Widget> _buildScreens() {
     return [
-      FlashcardsTab(controller: _controller),  // Removed HomeTab
+      FlashcardsTab(controller: _controller, onDeckCreated: () {  },),  // Removed HomeTab
       CreateTab(
         onDeckCreated: () {},
         controller: _controller,
       ),
-      TestTab(),
-      ProfileTab(),
+      const TestTab(),
+      const ProfileTab(),
     ];
   }
 

@@ -1,10 +1,11 @@
+// ignore_for_file: unnecessary_const, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/utils/colors.dart';
 import 'package:studycards/tabs/custom_title.dart';
 import 'package:studycards/tabs/profile_performance.dart';
 import 'package:studycards/tabs/profile_settings.dart';
-import 'package:studycards/database_helper.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -57,23 +58,23 @@ class _ProfileTabState extends State<ProfileTab> with SingleTickerProviderStateM
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.only(bottom: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  CustomTitle(title: 'You'),
-                  SizedBox(height: 20),
+                  const CustomTitle(title: 'You'),
+                  const SizedBox(height: 20),
                   Center(
                     child: Text(
                       'Hello, $_username!',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   if (_profilePicture != null)
                     Center(
                       child: CircleAvatar(
@@ -90,7 +91,7 @@ class _ProfileTabState extends State<ProfileTab> with SingleTickerProviderStateM
                 children: [
                   TabBar(
                     controller: _tabController,
-                    tabs: [
+                    tabs: const [
                       Tab(
                         text: 'Performance',
                         icon: Icon(Icons.assessment, color: AppColors.blue),

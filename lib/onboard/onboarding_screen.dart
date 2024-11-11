@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, avoid_print, unused_import
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/main.dart';
@@ -124,7 +126,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -135,7 +137,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           (index) => _buildDots(index: index),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       _currentPage + 1 == contents.length
                           ? ElevatedButton(
                               onPressed: _completeOnboarding,

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/main.dart';
@@ -8,7 +10,7 @@ class UsernameScreen extends StatefulWidget {
   final bool isEditMode;
   final Function(String, String) onSave;
 
-  UsernameScreen({this.isEditMode = false, required this.onSave});
+  const UsernameScreen({super.key, this.isEditMode = false, required this.onSave});
 
   @override
   _UsernameScreenState createState() => _UsernameScreenState();
@@ -59,12 +61,12 @@ class _UsernameScreenState extends State<UsernameScreen> {
       } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter a username and select a picture')),
+        const SnackBar(content: Text('Please enter a username and select a picture')),
       );
     }
   }
@@ -80,27 +82,27 @@ class _UsernameScreenState extends State<UsernameScreen> {
         backgroundColor: Colors.white,
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 widget.isEditMode ? 'Edit your profile' : 'Create your profile',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: AppColors.red,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
               // Username TextField with styling
               TextField(
                 controller: _usernameController,
                 decoration: InputDecoration(
                   labelText: 'Username',
-                  labelStyle: TextStyle(
+                  labelStyle: const TextStyle(
                     color: AppColors.blue, // Label color when the field is active
                     fontSize: 16,
                   ),
@@ -114,7 +116,7 @@ class _UsernameScreenState extends State<UsernameScreen> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: AppColors.blueish, width: 2), // Focused border color
+                    borderSide: const BorderSide(color: AppColors.blueish, width: 2), // Focused border color
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -122,10 +124,10 @@ class _UsernameScreenState extends State<UsernameScreen> {
                   ),
                   filled: true,
                   fillColor: Colors.white, // Background color of the TextField
-                  contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16), // Padding inside the TextField
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16), // Padding inside the TextField
                   suffixIcon: _usernameController.text.isNotEmpty
                       ? IconButton(
-                          icon: Icon(Icons.clear),
+                          icon: const Icon(Icons.clear),
                           onPressed: () {
                             setState(() {
                               _usernameController.clear();
@@ -136,7 +138,7 @@ class _UsernameScreenState extends State<UsernameScreen> {
                 ),
               ),
 
-              SizedBox(height: 30), // Increased space between username and profile picture selection
+              const SizedBox(height: 30), // Increased space between username and profile picture selection
 
               // Profile Picture selection
               Text(
@@ -147,16 +149,16 @@ class _UsernameScreenState extends State<UsernameScreen> {
                   color: Colors.grey[700],
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               GridView.builder(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 3,
                   crossAxisSpacing: 16.0,
                   mainAxisSpacing: 16.0,
                 ),
                 itemCount: _pfpList.length,
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
                   final isSelected = _selectedPfp == _pfpList[index];
                   return GestureDetector(
@@ -192,7 +194,7 @@ class _UsernameScreenState extends State<UsernameScreen> {
                 },
               ),
 
-              SizedBox(height: 30), // Space before the save button
+              const SizedBox(height: 30), // Space before the save button
 
               // Save Button
               Center(
@@ -200,14 +202,14 @@ class _UsernameScreenState extends State<UsernameScreen> {
                   onPressed: _saveData,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.blue,
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
                   child: Text(
                     widget.isEditMode ? 'Update' : 'Save',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,

@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, library_private_types_in_public_api, use_super_parameters
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:studycards/flashcard_model.dart';
@@ -29,7 +31,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
   bool _hasSelected = false;
   bool _selectedIsCorrect = false; // To track which image was selected
   late Timer _timer;
-  Duration _remainingTime = Duration();
+  Duration _remainingTime = const Duration();
   int _currentIndex = 0; // Track current card index
 
   @override
@@ -54,10 +56,10 @@ class _YourTestScreenState extends State<YourTestScreen> {
 
   void _startTimer() {
     print("Starting timer with duration: ${widget.timerDuration}...");
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingTime.inSeconds > 0) {
         setState(() {
-          _remainingTime -= Duration(seconds: 1);
+          _remainingTime -= const Duration(seconds: 1);
         });
         print("Timer tick: $_remainingTime");
       } else {
@@ -117,7 +119,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(
+          title: const Text(
             "Test Completed",
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
@@ -126,11 +128,11 @@ class _YourTestScreenState extends State<YourTestScreen> {
             children: [
               Text(
                 "Correct Answers: $_correctCount",
-                style: TextStyle(fontSize: 18, color: AppColors.blueish),
+                style: const TextStyle(fontSize: 18, color: AppColors.blueish),
               ),
               Text(
                 "Wrong Answers: $_wrongCount",
-                style: TextStyle(fontSize: 18, color: AppColors.red),
+                style: const TextStyle(fontSize: 18, color: AppColors.red),
               ),
             ],
           ),
@@ -142,12 +144,12 @@ class _YourTestScreenState extends State<YourTestScreen> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => HomeScreen(
+                    builder: (context) => const HomeScreen(
                         initialIndex: 2), // Set index to 3 for TestTab
                   ),
                 );
               },
-              child: Text(
+              child: const Text(
                 "OK",
                 style: TextStyle(color: AppColors.blue),
               ),
@@ -166,7 +168,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _flashcards.isEmpty
-            ? Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator())
             : _buildFlashcardContent(),
       ),
     );
@@ -179,25 +181,25 @@ class _YourTestScreenState extends State<YourTestScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CustomTitle(title: 'Your Test'), // Custom title for the screen
-          SizedBox(height: 20),
+          const CustomTitle(title: 'Your Test'), // Custom title for the screen
+          const SizedBox(height: 20),
           // Centered timer
           Text(
             '${_remainingTime.inHours.toString().padLeft(2, '0')}h '
             '${_remainingTime.inMinutes.remainder(60).toString().padLeft(2, '0')}m '
             '${_remainingTime.inSeconds.remainder(60).toString().padLeft(2, '0')}s',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: AppColors.blue,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             'Flashcard ${_currentIndex + 1} of ${_flashcards.length}',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           FlashcardWidget(
             key: ValueKey(_currentIndex),
             question: _flashcards[_currentIndex].question,
@@ -205,7 +207,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
             color: _flashcards[_currentIndex].color,
             isQuestionSide: true,
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -234,7 +236,7 @@ class _YourTestScreenState extends State<YourTestScreen> {
                   ),
                 ),
               ),
-              SizedBox(width: 30),
+              const SizedBox(width: 30),
               GestureDetector(
                 onTap: _hasSelected ? null : () => _selectAnswer(true),
                 child: Container(
@@ -262,14 +264,14 @@ class _YourTestScreenState extends State<YourTestScreen> {
               ),
             ],
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           ElevatedButton(
   onPressed: _hasSelected ? _nextCard : null,
   style: ElevatedButton.styleFrom(
     backgroundColor: _hasSelected ? AppColors.blue : AppColors.greyish, // Background color
-    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12), // Button padding
+    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12), // Button padding
   ),
-  child: Text(
+  child: const Text(
     'Next',
     style: TextStyle(
       color: Colors.white, // Text color

@@ -1,10 +1,12 @@
+// ignore_for_file: avoid_print, library_private_types_in_public_api
+
 import 'dart:async'; // Import for Timer functionality
 
 import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/flashcard_model.dart';
 import 'package:studycards/flashcard_widget.dart';
-import 'package:studycards/utils/colors.dart'; // Assuming you have a constants file for AppColor
+// Assuming you have a constants file for AppColor
 
 class YourFlashcardsScreen extends StatefulWidget {
   final int deckId; // The selected deck ID
@@ -85,7 +87,7 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
     final topPadding = MediaQuery.of(context).padding.top;
 
     if (_deckTitle == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(child: CircularProgressIndicator()), // Show a loading spinner
       );
     }
@@ -100,16 +102,16 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
             Row(
               children: [
                 IconButton(
-                  icon: Icon(Icons.arrow_back), // Back arrow icon
+                  icon: const Icon(Icons.arrow_back), // Back arrow icon
                   onPressed: () {
                     Navigator.pop(context); // Navigate back to the previous screen
                   },
                 ),
-                SizedBox(width: 10), // Spacing between button and title
+                const SizedBox(width: 10), // Spacing between button and title
                 Expanded(
                   child: Text(
                     _deckTitle ?? 'Loading...', // Display the deck title
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 28.0,
                       fontWeight: FontWeight.bold,
                       color: Colors.black87,
@@ -119,7 +121,7 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
               ],
             ),
 
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
 
             // Deck Description (if available)
             if (_deckDescription != null && _deckDescription!.isNotEmpty)
@@ -127,7 +129,7 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
                 padding: const EdgeInsets.only(bottom: 20.0),
                 child: Text(
                   _deckDescription!,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16.0,
                     color: Colors.black54,
                   ),
@@ -161,7 +163,7 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
                           color: flashcard.color,
                           isQuestionSide: _isQuestionSide,  // Pass the current side
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
 
                         // Note section for the current card
                         Padding(
@@ -169,18 +171,18 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 "Notes:",
                                 style: TextStyle(
                                   fontSize: 18.0,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 8.0),
+                              const SizedBox(height: 8.0),
                               TextField(
                                 controller: _noteControllers[index], // Controller for the current card's note
                                 maxLines: 4,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   hintText: "Write a note here...",
                                   border: OutlineInputBorder(),
                                 ),
@@ -205,7 +207,7 @@ class _YourFlashcardsScreenState extends State<YourFlashcardsScreen> {
               child: Center(
                 child: Text(
                   'Card ${_currentPage + 1} of ${_flashcards.length}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                   ),

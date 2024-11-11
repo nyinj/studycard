@@ -1,3 +1,5 @@
+// ignore_for_file: depend_on_referenced_packages, avoid_print, duplicate_ignore
+
 import 'dart:convert';
 
 import 'package:sqflite/sqflite.dart';
@@ -209,6 +211,7 @@ Future<String?> exportDeckToJson(int deckId) async {
   if (result.isNotEmpty) {
     return result.first;
   } else {
+    // ignore: avoid_print
     print('Deck not found for ID: $deckId');
     return null;  // Return null if deck not found
   }
@@ -295,7 +298,7 @@ Future<String?> exportDeckToJson(int deckId) async {
   }
 
   Future<List<Map<String, dynamic>>> getFlashcardsWithScores() async {
-    final db = await _database;
+    final db = _database;
     var result = await db!.query('flashcards'); // Adjust with actual table name
 
     // Assuming you have 'title' and 'score' in your flashcard table:

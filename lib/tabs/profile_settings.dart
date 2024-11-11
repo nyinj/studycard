@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -10,7 +12,7 @@ import 'package:studycards/utils/colors.dart';
 class ProfileSettings extends StatelessWidget {
   final Function(String, String) onProfileUpdated;
 
-  ProfileSettings({required this.onProfileUpdated});
+  const ProfileSettings({super.key, required this.onProfileUpdated});
 
   // Export a deck of flashcards
   Future<void> _exportDeck(BuildContext context) async {
@@ -20,7 +22,7 @@ class ProfileSettings extends StatelessWidget {
 
       if (decks.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No decks available for export.')),
+          const SnackBar(content: Text('No decks available for export.')),
         );
         return;
       }
@@ -30,7 +32,7 @@ class ProfileSettings extends StatelessWidget {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('Select Deck to Export'),
+            title: const Text('Select Deck to Export'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: decks.map((deck) {
@@ -55,7 +57,7 @@ class ProfileSettings extends StatelessWidget {
 
       if (flashcards.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No flashcards in this deck to export.')),
+          const SnackBar(content: Text('No flashcards in this deck to export.')),
         );
         return;
       }
@@ -92,7 +94,7 @@ class ProfileSettings extends StatelessWidget {
     } catch (e) {
       print("Error during export: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred while exporting the deck.')),
+        const SnackBar(content: Text('An error occurred while exporting the deck.')),
       );
     }
   }
@@ -105,7 +107,7 @@ class ProfileSettings extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
+          const Text(
             'Profile Settings',
             style: TextStyle(
               fontSize: 24,
@@ -114,31 +116,31 @@ class ProfileSettings extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           ElevatedButton.icon(
             onPressed: () => _navigateToUsernameScreen(context),
-            icon: Icon(Icons.edit, color: Colors.white),
-            label: Text(
+            icon: const Icon(Icons.edit, color: Colors.white),
+            label: const Text(
               'Edit Username & Profile Picture',
               style: TextStyle(fontSize: 16),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.blue,
-              padding: EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               foregroundColor: Colors.white,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: () => _exportDeck(context),
-            icon: Icon(Icons.download, color: Colors.white),
-            label: Text(
+            icon: const Icon(Icons.download, color: Colors.white),
+            label: const Text(
               'Export Deck',
               style: TextStyle(fontSize: 16),
             ),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.blue,
-              padding: EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 14),
               foregroundColor: Colors.white,
             ),
           ),

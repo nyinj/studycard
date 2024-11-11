@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element, library_private_types_in_public_api, avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/tabs/custom_title.dart';
@@ -57,8 +59,8 @@ class _TestTabState extends State<TestTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTitle(title: 'Test'),
-            SizedBox(height: 20),
+            const CustomTitle(title: 'Test'),
+            const SizedBox(height: 20),
 
             // Timer Picker Section with labels
             Row(
@@ -75,16 +77,16 @@ class _TestTabState extends State<TestTab> {
                           _selectedHour = value;
                         });
                       },
-                      textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      selectedTextStyle: TextStyle(
+                      textStyle: const TextStyle(color: Colors.black, fontSize: 16),
+                      selectedTextStyle: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    Text("hh"),
+                    const Text("hh"),
                   ],
                 ),
-                Text(" : "),
+                const Text(" : "),
                 Column(
                   children: [
                     NumberPicker(
@@ -96,16 +98,16 @@ class _TestTabState extends State<TestTab> {
                           _selectedMinute = value;
                         });
                       },
-                      textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      selectedTextStyle: TextStyle(
+                      textStyle: const TextStyle(color: Colors.black, fontSize: 16),
+                      selectedTextStyle: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    Text("mm"),
+                    const Text("mm"),
                   ],
                 ),
-                Text(" : "),
+                const Text(" : "),
                 Column(
                   children: [
                     NumberPicker(
@@ -117,23 +119,23 @@ class _TestTabState extends State<TestTab> {
                           _selectedSecond = value;
                         });
                       },
-                      textStyle: TextStyle(color: Colors.black, fontSize: 16),
-                      selectedTextStyle: TextStyle(
+                      textStyle: const TextStyle(color: Colors.black, fontSize: 16),
+                      selectedTextStyle: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    Text("ss"),
+                    const Text("ss"),
                   ],
                 ),
               ],
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Instruction Text
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
               child: Text(
                 "Select one flashcard to test on:",
                 style: TextStyle(
@@ -146,9 +148,9 @@ class _TestTabState extends State<TestTab> {
 
             // Display message if no decks are available
             if (_decks.isEmpty)
-              Center(
+              const Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(8.0),
                   child: Text(
                     'No Flashcards to show, create one to get tested!',
                     style: TextStyle(
@@ -179,7 +181,7 @@ class _TestTabState extends State<TestTab> {
                         });
                       },
                       child: Card(
-                        margin: EdgeInsets.only(bottom: 16.0),
+                        margin: const EdgeInsets.only(bottom: 16.0),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -198,7 +200,7 @@ class _TestTabState extends State<TestTab> {
                           child: ListTile(
                             title: Text(
                               deck['title'],
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
@@ -209,15 +211,15 @@ class _TestTabState extends State<TestTab> {
                               children: [
                                 Text(
                                   'Cards: ${deck['number_of_cards']}',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 16,
                                   ),
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   'Created on: $formattedDate',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white70,
                                     fontSize: 14,
                                   ),
@@ -242,7 +244,7 @@ class _TestTabState extends State<TestTab> {
                       backgroundColor:
                           AppColors.skin, // Ensure this color is defined
                       padding:
-                          EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                          const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                     ),
                     onPressed: () {
                       // Calculate total time in seconds
@@ -253,7 +255,7 @@ class _TestTabState extends State<TestTab> {
                       if (totalSeconds < 5) {
                         // Show SnackBar if the selected time is less than 5 seconds
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                          const SnackBar(
                             content: Text(
                               'Please select a time greater than 5 seconds.',
                               style: TextStyle(color: Colors.white),
@@ -278,7 +280,7 @@ class _TestTabState extends State<TestTab> {
                         );
                       }
                     },
-                    child: Text(
+                    child: const Text(
                       "Start Test",
                       style: TextStyle(
                         color: Colors.black,
@@ -303,7 +305,7 @@ class _TestTabState extends State<TestTab> {
       height: 40,
       errorBuilder: (context, error, stackTrace) {
         print("Error loading image at $assetPath: $error");
-        return Icon(Icons.error); // Display an error icon if loading fails
+        return const Icon(Icons.error); // Display an error icon if loading fails
       },
     );
   }

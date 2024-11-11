@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_const, library_private_types_in_public_api, use_key_in_widget_constructors, unused_local_variable
+
 import 'package:flutter/material.dart';
 import 'package:studycards/database_helper.dart';
 import 'package:studycards/utils/colors.dart';
@@ -23,7 +25,6 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
   int _totalDecksCount = 0;
   int _testsTaken = 0;
   double _averageTestScore = 0.0;
-  int _highScoreFlashcards = 0;
 
   final DatabaseHelper _databaseHelper = DatabaseHelper();
 
@@ -51,7 +52,6 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
       _flashcardsCreated = performanceData['flashcards_created'] ?? 0;
       _testsTaken = testsTaken;
       _averageTestScore = averageScore;
-      _highScoreFlashcards = highScoreCount;
     });
   }
 
@@ -109,16 +109,16 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
       elevation: 4,
       color: color ?? Colors.grey[200],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(label,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            SizedBox(height: 8),
-            Text(value, style: TextStyle(fontSize: 20, color: Colors.black)),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const SizedBox(height: 8),
+            Text(value, style: const TextStyle(fontSize: 20, color: Colors.black)),
           ],
         ),
       ),
@@ -135,10 +135,10 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
           Card(
             elevation: 4,
             color: AppColors.red,
-            margin: EdgeInsets.all(16),
+            margin: const EdgeInsets.all(16),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: Padding(
+            child: const Padding(
               padding: EdgeInsets.all(16),
               child: Column(
                 children: [
@@ -156,7 +156,7 @@ class _ProfilePerformanceState extends State<ProfilePerformance> {
                   Center(
                     child: Text(
                       'Resets every month',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.white70, // Lighter color for subtitle
                       ),
