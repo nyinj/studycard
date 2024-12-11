@@ -77,13 +77,14 @@ class _TestTabState extends State<TestTab> {
                           _selectedHour = value;
                         });
                       },
-                      textStyle: const TextStyle(color: Colors.black, fontSize: 16),
+                      textStyle:
+                          const TextStyle(color: Colors.black, fontSize: 16),
                       selectedTextStyle: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    const Text("hh"),
+                    const Text("Hours"),
                   ],
                 ),
                 const Text(" : "),
@@ -98,13 +99,14 @@ class _TestTabState extends State<TestTab> {
                           _selectedMinute = value;
                         });
                       },
-                      textStyle: const TextStyle(color: Colors.black, fontSize: 16),
+                      textStyle:
+                          const TextStyle(color: Colors.black, fontSize: 16),
                       selectedTextStyle: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    const Text("mm"),
+                    const Text("Minutes"),
                   ],
                 ),
                 const Text(" : "),
@@ -119,13 +121,14 @@ class _TestTabState extends State<TestTab> {
                           _selectedSecond = value;
                         });
                       },
-                      textStyle: const TextStyle(color: Colors.black, fontSize: 16),
+                      textStyle:
+                          const TextStyle(color: Colors.black, fontSize: 16),
                       selectedTextStyle: const TextStyle(
                           color: Colors.black,
                           fontSize: 20,
                           fontWeight: FontWeight.bold),
                     ),
-                    const Text("ss"),
+                    const Text("Seconds"),
                   ],
                 ),
               ],
@@ -243,8 +246,8 @@ class _TestTabState extends State<TestTab> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
                           AppColors.skin, // Ensure this color is defined
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
                     ),
                     onPressed: () {
                       // Calculate total time in seconds
@@ -305,7 +308,8 @@ class _TestTabState extends State<TestTab> {
       height: 40,
       errorBuilder: (context, error, stackTrace) {
         print("Error loading image at $assetPath: $error");
-        return const Icon(Icons.error); // Display an error icon if loading fails
+        return const Icon(
+            Icons.error); // Display an error icon if loading fails
       },
     );
   }

@@ -8,11 +8,11 @@ import 'package:studycards/utils/colors.dart'; // Assuming AppColors is defined
 
 class FlashcardsTab extends StatefulWidget {
   final PersistentTabController controller;
-  final VoidCallback onDeckCreated; // Callback to notify deck creation
+  final VoidCallback onDeckCreated;
 
   const FlashcardsTab({
-    super.key, 
-    required this.controller, 
+    super.key,
+    required this.controller,
     required this.onDeckCreated,
   });
 
@@ -22,63 +22,32 @@ class FlashcardsTab extends StatefulWidget {
 
 class _FlashcardsTabState extends State<FlashcardsTab> {
   late final DatabaseHelper _databaseHelper;
-  final List<Map<String, dynamic>> _decks = [];
-  int _totalDecksCount = 0; // Track the number of flashcard decks
-  int _totalFlashcardsCount = 0; // Track the total number of flashcards across all decks
 
   @override
   void initState() {
     super.initState();
     _databaseHelper = DatabaseHelper();
-    _onDeckCreated();
-    _loadDecks();
   }
 
-  // Refresh deck list
-  Future<void> _refresh() async {
-    await _loadDecks();
-  }
-
-  // Delete deck
-  Future<void> _deleteDeck(int id) async {
-    await _databaseHelper.deleteDeck(id);
-    _loadDecks();
-  }
-
-  void _onDeckCreated() async {
-    // Call _loadDecks to refresh the deck list
-    await _loadDecks();
-    setState(() {
-      // Trigger a UI rebuild after loading decks
-    });
-  }
-
-  Future<void> _loadDecks() async {
+  Future<List<Map<String, dynamic>>> _loadDecks() async {
     final decks = await _databaseHelper.getDecks();
+    final List<Map<String, dynamic>> loadedDecks = [];
     int totalFlashcards = 0;
 
-    // Clear the current list of decks to prevent duplication
-    _decks.clear();
-
-    // Load all decks and count flashcards for each
     for (var deck in decks) {
       int colorValue = int.tryParse(deck['color']) ?? 0xFF000000;
-      int flashcardCount = await _databaseHelper.getFlashcardsCountByDeck(deck['id']);
-      totalFlashcards += flashcardCount; // Add the count of flashcards for this deck to the total
+      int flashcardCount =
+          await _databaseHelper.getFlashcardsCountByDeck(deck['id']);
+      totalFlashcards += flashcardCount;
 
-      setState(() {
-        _decks.add({
-          ...deck,
-          'color': Color(colorValue),
-          'flashcardCount': flashcardCount, // Store the flashcard count in the deck map
-        });
+      loadedDecks.add({
+        ...deck,
+        'color': Color(colorValue),
+        'flashcardCount': flashcardCount,
       });
     }
 
-    setState(() {
-      _totalDecksCount = decks.length; // Count the total number of decks
-      _totalFlashcardsCount = totalFlashcards; // Store the total flashcard count
-    });
+    return loadedDecks;
   }
 
   @override
@@ -90,36 +59,49 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomTitle(title: 'StudyCards'), // Custom Title at the top, fixed
-          SizedBox(height: 16), // Space between title and list
+          const CustomTitle(title: 'StudyCards'),
+          const SizedBox(height: 16),
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: _refresh,
-              color: AppColors.blue, // Custom color for pull-to-refresh
-              child: ListView(
-                children: [
-                  // Display message if no decks are available
-                  if (_decks.isEmpty) ...[
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Center(
-                        child: Text(
-                          'No flashcards created, go to create tab to create a new flashcard',
-                          style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 16,
-                            fontStyle: FontStyle.italic,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _loadDecks(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No flashcards created, go to create tab to create a new flashcard',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 16,
+                        fontStyle: FontStyle.italic,
                       ),
+                      textAlign: TextAlign.center,
                     ),
-                  ],
-                  // Display list of decks if available
-                  if (_decks.isNotEmpty) ...[
-                    ..._decks.map((deck) {
-                      DateTime createdDate = DateTime.parse(deck['createdAt']);
-                      String formattedDate = DateFormat('yyyy-MM-dd').format(createdDate);
+                  );
+                }
+
+                final decks = snapshot.data!;
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    setState(() {}); // Triggers a rebuild and refresh
+                  },
+                  color: AppColors.blue,
+                  child: ListView.builder(
+                    itemCount: decks.length,
+                    itemBuilder: (context, index) {
+                      final deck = decks[index];
+                      DateTime createdDate =
+                          DateTime.tryParse(deck['createdAt']) ??
+                              DateTime.now();
+                      String formattedDate =
+                          DateFormat('yyyy-MM-dd').format(createdDate);
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 16.0),
@@ -173,7 +155,8 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
                               ],
                             ),
                             trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.white),
+                              icon:
+                                  const Icon(Icons.delete, color: Colors.white),
                               onPressed: () {
                                 _deleteDeck(deck['id']);
                               },
@@ -182,22 +165,27 @@ class _FlashcardsTabState extends State<FlashcardsTab> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => YourFlashcardsScreen(
-                                      deckId: deck['id']),
+                                  builder: (context) =>
+                                      YourFlashcardsScreen(deckId: deck['id']),
                                 ),
                               );
                             },
                           ),
                         ),
                       );
-                    }).toList(),
-                  ],
-                ],
-              ),
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _deleteDeck(int id) async {
+    await _databaseHelper.deleteDeck(id);
+    setState(() {}); // Refresh the list after deletion
   }
 }

@@ -25,7 +25,6 @@ class CreateTab extends StatefulWidget {
     super.key,
     required this.controller,
     required this.onDeckCreated, // Required callback
-    
   });
 
   @override
@@ -201,7 +200,8 @@ class _CreateTabState extends State<CreateTab> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.white, width: 2.0),
+                    borderSide:
+                        const BorderSide(color: Colors.white, width: 2.0),
                   ),
                 ),
                 style: const TextStyle(color: Colors.white),
@@ -224,7 +224,8 @@ class _CreateTabState extends State<CreateTab> {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
-                    borderSide: const BorderSide(color: Colors.white, width: 2.0),
+                    borderSide:
+                        const BorderSide(color: Colors.white, width: 2.0),
                   ),
                 ),
                 style: const TextStyle(color: Colors.white),
@@ -278,7 +279,7 @@ class _CreateTabState extends State<CreateTab> {
       _selectedColor.value.toString(),
       DateTime.now().toString(),
     );
-  
+
     // Insert cards into the database
     int cardCount = 0;
     for (var card in _cards) {
@@ -298,81 +299,79 @@ class _CreateTabState extends State<CreateTab> {
 
     // Update deck card count
     await _databaseHelper.updateDeckCardCount(deckId, cardCount);
-    widget.onDeckCreated();  // This is where you notify the FlashcardsTab
+    widget.onDeckCreated(); // This is where you notify the FlashcardsTab
 
     _showSuccessDialog();
-}
-
+  }
 
   void _showSuccessDialog() {
-  showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.0),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            Icon(
-              Icons.check_circle,
-              color: Colors.green,
-              size: 40,
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Flashcard Created',
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.0),
+          ),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: const [
+              Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 40,
+              ),
+              SizedBox(height: 10),
+              Text(
+                'Flashcard Created',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+          content: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              'Your new flashcards deck has been successfully created!',
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+                fontSize: 16,
                 color: Colors.black,
               ),
             ),
-          ],
-        ),
-        content: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          child: Text(
-            'Your new flashcards deck has been successfully created!',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.black,
-            ),
           ),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              widget.onDeckCreated();
-              _clearInputs();
-            },
-            style: TextButton.styleFrom(
-              backgroundColor: _selectedColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                widget.onDeckCreated();
+                _clearInputs();
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: _selectedColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
-              child: Text(
-                'OK',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+                child: Text(
+                  'OK',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      );
-    },
-  );
-}
-
+          ],
+        );
+      },
+    );
+  }
 
   void _clearInputs() {
     _titleController.clear();
@@ -383,5 +382,4 @@ class _CreateTabState extends State<CreateTab> {
     _cards.add({'question': '', 'answer': ''});
     setState(() {});
   }
-  
 }
