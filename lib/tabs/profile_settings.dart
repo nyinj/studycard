@@ -49,7 +49,8 @@ class ProfileSettings extends StatelessWidget {
 
       if (selectedDeck == null) return;
 
-      List<Flashcard> flashcards = await dbHelper.getFlashcardsByDeckId(selectedDeck['id']);
+      List<Flashcard> flashcards =
+          await dbHelper.getFlashcardsByDeckId(selectedDeck['id']);
 
       if (flashcards.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -155,7 +156,7 @@ class ProfileSettings extends StatelessWidget {
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context); // Close the dialog
-                      SystemNavigator.pop();  // Close the app
+                      SystemNavigator.pop(); // Close the app
                     },
                     child: Text(
                       'OK',
@@ -192,7 +193,10 @@ class ProfileSettings extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 30),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.02), // Adjust height based on screen size
+
           ElevatedButton.icon(
             onPressed: () => _navigateToUsernameScreen(context),
             icon: Icon(Icons.edit, color: Colors.white),
@@ -206,7 +210,10 @@ class ProfileSettings extends StatelessWidget {
               foregroundColor: Colors.white,
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.02), // Adjust height based on screen size
+
           ElevatedButton.icon(
             onPressed: () => _exportDeck(context),
             icon: Icon(Icons.download, color: Colors.white),
@@ -220,7 +227,10 @@ class ProfileSettings extends StatelessWidget {
               foregroundColor: Colors.white,
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.02), // Adjust height based on screen size
+
           ElevatedButton.icon(
             onPressed: () => _clearAllData(context),
             icon: Icon(Icons.delete, color: Colors.white),

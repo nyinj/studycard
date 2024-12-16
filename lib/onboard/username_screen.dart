@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:studycards/main.dart';
 import 'package:studycards/utils/colors.dart';
-import 'package:studycards/tabs/custom_title.dart';  // Import your CustomTitle widget
+import 'package:studycards/tabs/custom_title.dart'; // Import your CustomTitle widget
 
 class UsernameScreen extends StatefulWidget {
   final bool isEditMode;
   final Function(String, String) onSave;
 
-  const UsernameScreen({super.key, this.isEditMode = false, required this.onSave});
+  const UsernameScreen(
+      {super.key, this.isEditMode = false, required this.onSave});
 
   @override
   _UsernameScreenState createState() => _UsernameScreenState();
@@ -66,7 +67,8 @@ class _UsernameScreenState extends State<UsernameScreen> {
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a username and select a picture')),
+        const SnackBar(
+            content: Text('Please enter a username and select a picture')),
       );
     }
   }
@@ -103,7 +105,8 @@ class _UsernameScreenState extends State<UsernameScreen> {
                 decoration: InputDecoration(
                   labelText: 'Username',
                   labelStyle: const TextStyle(
-                    color: AppColors.blue, // Label color when the field is active
+                    color:
+                        AppColors.blue, // Label color when the field is active
                     fontSize: 16,
                   ),
                   hintText: 'Enter your username',
@@ -111,20 +114,28 @@ class _UsernameScreenState extends State<UsernameScreen> {
                     color: Colors.grey[500], // Lighter text for hint
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12), // Rounded corners for the border
-                    borderSide: BorderSide(color: Colors.grey[300]!), // Subtle border color
+                    borderRadius: BorderRadius.circular(
+                        12), // Rounded corners for the border
+                    borderSide: BorderSide(
+                        color: Colors.grey[300]!), // Subtle border color
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.blueish, width: 2), // Focused border color
+                    borderSide: const BorderSide(
+                        color: AppColors.blueish,
+                        width: 2), // Focused border color
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey[300]!, width: 1), // Default border color
+                    borderSide: BorderSide(
+                        color: Colors.grey[300]!,
+                        width: 1), // Default border color
                   ),
                   filled: true,
                   fillColor: Colors.white, // Background color of the TextField
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16), // Padding inside the TextField
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 16), // Padding inside the TextField
                   suffixIcon: _usernameController.text.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear),
@@ -138,7 +149,9 @@ class _UsernameScreenState extends State<UsernameScreen> {
                 ),
               ),
 
-              const SizedBox(height: 30), // Increased space between username and profile picture selection
+              const SizedBox(
+                  height:
+                      30), // Increased space between username and profile picture selection
 
               // Profile Picture selection
               Text(
@@ -151,10 +164,14 @@ class _UsernameScreenState extends State<UsernameScreen> {
               ),
               const SizedBox(height: 10),
               GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: MediaQuery.of(context).size.width > 600
+                      ? 6
+                      : 3, // Adjust columns for larger screens
+                  crossAxisSpacing: MediaQuery.of(context).size.width *
+                      0.04, // Responsive cross-axis spacing
+                  mainAxisSpacing: MediaQuery.of(context).size.width *
+                      0.04, // Responsive main-axis spacing
                 ),
                 itemCount: _pfpList.length,
                 shrinkWrap: true,
@@ -171,7 +188,9 @@ class _UsernameScreenState extends State<UsernameScreen> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: isSelected ? AppColors.orange : Colors.transparent,
+                          color: isSelected
+                              ? AppColors.orange
+                              : Colors.transparent,
                           width: 2.0,
                         ),
                         boxShadow: [
@@ -202,7 +221,8 @@ class _UsernameScreenState extends State<UsernameScreen> {
                   onPressed: _saveData,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.blue,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 40, vertical: 15),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
                     ),

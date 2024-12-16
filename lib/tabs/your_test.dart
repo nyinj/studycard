@@ -169,12 +169,12 @@ class _YourTestScreenState extends State<YourTestScreen> {
         padding: const EdgeInsets.all(16.0),
         child: _flashcards.isEmpty
             ? const Center(child: CircularProgressIndicator())
-            : _buildFlashcardContent(),
+            : _buildFlashcardContent(context),
       ),
     );
   }
 
-  Widget _buildFlashcardContent() {
+  Widget _buildFlashcardContent(BuildContext context) {
     print("Building flashcard content for card ${_currentIndex + 1}...");
     return Center(
       child: Column(
@@ -182,7 +182,10 @@ class _YourTestScreenState extends State<YourTestScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const CustomTitle(title: 'Your Test'), // Custom title for the screen
-          const SizedBox(height: 20),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.02), // Adjust height based on screen size
+
           // Centered timer
           Text(
             '${_remainingTime.inHours.toString().padLeft(2, '0')}h '
@@ -194,12 +197,18 @@ class _YourTestScreenState extends State<YourTestScreen> {
               color: AppColors.blue,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.007), // Adjust height based on screen size
+
           Text(
             'Flashcard ${_currentIndex + 1} of ${_flashcards.length}',
             style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 20),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.007), // Adjust height based on screen size
+
           FlashcardWidget(
             key: ValueKey(_currentIndex),
             question: _flashcards[_currentIndex].question,
@@ -207,7 +216,10 @@ class _YourTestScreenState extends State<YourTestScreen> {
             color: _flashcards[_currentIndex].color,
             isQuestionSide: true,
           ),
-          const SizedBox(height: 20),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.007), // Adjust height based on screen size
+
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -231,8 +243,10 @@ class _YourTestScreenState extends State<YourTestScreen> {
                   ),
                   child: Image.asset(
                     'assets/wrong.png',
-                    width: 60,
-                    height: 60,
+                    width: MediaQuery.of(context).size.width *
+                        0.09, // Adjust width for responsiveness
+                    height: MediaQuery.of(context).size.height *
+                        0.08, // Adjust height for responsiveness
                   ),
                 ),
               ),
@@ -257,30 +271,43 @@ class _YourTestScreenState extends State<YourTestScreen> {
                   ),
                   child: Image.asset(
                     'assets/correct.png',
-                    width: 60,
-                    height: 60,
+                    width: MediaQuery.of(context).size.width *
+                        0.09, // Adjust width for responsiveness
+                    height: MediaQuery.of(context).size.height *
+                        0.08, // Adjust height for responsiveness
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(
+              height: MediaQuery.of(context).size.height *
+                  0.02), // Adjust height based on screen size
           ElevatedButton(
-  onPressed: _hasSelected ? _nextCard : null,
-  style: ElevatedButton.styleFrom(
-    backgroundColor: _hasSelected ? AppColors.blue : AppColors.greyish, // Background color
-    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12), // Button padding
-  ),
-  child: const Text(
-    'Next',
-    style: TextStyle(
-      color: Colors.white, // Text color
-      fontWeight: FontWeight.bold, // Optional: bold text
-      fontSize: 16, // Optional: font size
-    ),
-  ),
-),
-
+            onPressed: _hasSelected ? _nextCard : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _hasSelected
+                  ? AppColors.blue
+                  : AppColors.greyish, // Background color
+              padding: EdgeInsets.symmetric(
+                vertical: MediaQuery.of(context).size.height *
+                    0.02, // Adjust vertical padding based on screen height
+                horizontal: MediaQuery.of(context).size.width *
+                    0.1, // Adjust horizontal padding based on screen width
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: const Text(
+              'Next',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ],
       ),
     );
